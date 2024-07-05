@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/home_icon"
+        android:iconTint="#FFFFFF"
+        android:title=""
+        android:titleCondensed="Home" />
+    <item
+        android:id="@+id/statsFragment"
+        android:icon="@drawable/stats_icon"
+        android:iconTint="#FFFFFF"
+        android:title=""
+        android:titleCondensed="Stats" />
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/settings_icon"
+        android:iconTint="#FFFFFF"
+        android:title=""
+        android:titleCondensed="Settings" />
+</menu>
