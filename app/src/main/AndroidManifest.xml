@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH"/>
@@ -22,6 +23,11 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="health"/>
+
+        <service
+            android:name=".Service.DrivingActivityService"
+            android:enabled="true"
+            android:exported="false"/>
 
         <activity
             android:name=".MainActivity"

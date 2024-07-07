@@ -1,16 +1,20 @@
 package com.example.ppt
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.example.ppt.Service.DrivingActivityService
 
 class HomeFragment : Fragment() {
 
@@ -26,6 +30,27 @@ class HomeFragment : Fragment() {
     private var isDriving = false
     private var isSitting = false
 
+    private val locationRequestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            startDrivingActivity()
+        } else {
+            Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val stepsRequestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            startWalkingActivity()
+        } else {
+            Toast.makeText(requireContext(), "Activity permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,7 +68,7 @@ class HomeFragment : Fragment() {
 
         startWalkingButton.setOnClickListener {
             if (!doingActivity) {
-                startWalkingActivity()
+               startWalkingActivity()
             }
         }
 
@@ -55,7 +80,7 @@ class HomeFragment : Fragment() {
 
         startDrivingButton.setOnClickListener {
             if (!doingActivity) {
-                startDrivingActivity()
+               startDrivingActivity()
             }
         }
 
@@ -81,11 +106,38 @@ class HomeFragment : Fragment() {
         return view
     }
 
-    private fun startWalkingActivity() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val intent = Intent(requireContext(), WalkingActivityService::class.java)
-            requireContext().startService(intent)
+    private fun checkLocationPermissionAndStartDrivingActivity() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                startDrivingActivity()
+            }
+            else -> {
+                locationRequestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun checkActivityPermissionAndStartWalkingActivity() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                startWalkingActivity()
+            }
+            else -> {
+                stepsRequestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+        }
+    }
+
+    private fun startWalkingActivity() {
+        val intent = Intent(requireContext(), WalkingActivityService::class.java)
+        ContextCompat.startForegroundService(requireContext(), intent)
         isWalking = true
         doingActivity = true
         startWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
@@ -94,10 +146,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun stopWalkingActivity() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val intent = Intent(requireContext(), WalkingActivityService::class.java)
-            requireContext().stopService(intent)
-        }
+        val intent = Intent(requireContext(), WalkingActivityService::class.java)
+        requireContext().stopService(intent)
         isWalking = false
         doingActivity = false
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
@@ -105,11 +155,22 @@ class HomeFragment : Fragment() {
     }
 
     private fun startDrivingActivity() {
-        // Implement the logic to start driving activity
+        val intent = Intent(requireContext(), DrivingActivityService::class.java)
+        ContextCompat.startForegroundService(requireContext(), intent)
+        isDriving = true
+        doingActivity = true
+        startDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+        updateButtons()
     }
 
     private fun stopDrivingActivity() {
-        // Implement the logic to stop driving activity
+        val intent = Intent(requireContext(), DrivingActivityService::class.java)
+        requireContext().stopService(intent)
+        isDriving = false
+        doingActivity = false
+        stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        updateButtons()
     }
 
     private fun startSittingActivity() {
