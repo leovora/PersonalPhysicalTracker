@@ -1,10 +1,9 @@
-package com.example.ppt.data.dao
+package com.example.ppt.data
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.ppt.data.entities.Activity
 
 @Dao
 interface ActivityDao {
@@ -20,4 +19,7 @@ interface ActivityDao {
 
     @Query("SELECT * FROM activities WHERE startTimeMillis = :date")
     fun getActivitiesBytDate(date: Long): LiveData<List<Activity>>
+
+    //TODO: aggiungere query per grafici
+    // "https://www.youtube.com/watch?v=TP3uxBLzlhU&list=PLQkwcJG4YTCQ6emtoqSZS2FVwZR9FT3BV&index=3"
 }

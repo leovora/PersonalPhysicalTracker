@@ -1,14 +1,17 @@
-package com.example.ppt.ViewModel
+package com.example.ppt.ViewModels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ppt.data.dao.ActivityDao
-import com.example.ppt.data.entities.Activity
-import com.example.ppt.data.repositories.ActivityRepository
+import com.example.ppt.data.Activity
+import com.example.ppt.data.ActivityRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ActivityViewModel(private val repository: ActivityRepository) : ViewModel() {
+class ActivityViewModel(
+    val repository: ActivityRepository
+) : ViewModel() {
 
     fun getAllActivities(): LiveData<List<Activity>> {
         return repository.getAllActivities()

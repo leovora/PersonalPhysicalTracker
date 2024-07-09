@@ -1,4 +1,4 @@
-package com.example.ppt.data.entities
+package com.example.ppt.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

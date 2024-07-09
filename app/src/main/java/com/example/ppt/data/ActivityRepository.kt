@@ -1,10 +1,11 @@
-package com.example.ppt.data.repositories
+package com.example.ppt.data
 
 import androidx.lifecycle.LiveData
-import com.example.ppt.data.dao.ActivityDao
-import com.example.ppt.data.entities.Activity
+import javax.inject.Inject
 
-class ActivityRepository(private val activityDao: ActivityDao) {
+class ActivityRepository(
+    private val activityDao: ActivityDao
+) {
 
     suspend fun insertActivity(activity: Activity) {
         activityDao.insert(activity)

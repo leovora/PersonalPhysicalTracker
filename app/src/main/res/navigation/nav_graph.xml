@@ -7,17 +7,17 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.ppt.HomeFragment"
+        android:name="com.example.ppt.Fragments.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
     <fragment
         android:id="@+id/statsFragment"
-        android:name="com.example.ppt.StatsFragment"
+        android:name="com.example.ppt.Fragments.StatsFragment"
         android:label="fragment_stats"
         tools:layout="@layout/fragment_stats" />
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.example.ppt.SettingsFragment"
+        android:name="com.example.ppt.Fragments.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
 </navigation>

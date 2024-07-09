@@ -1,4 +1,4 @@
-package com.example.ppt
+package com.example.ppt.Services
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -12,10 +12,12 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.ppt.R
 import com.example.ppt.data.ActivityDatabase
-import com.example.ppt.data.entities.Activity
+import com.example.ppt.data.Activity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,11 +74,12 @@ class WalkingActivityService : Service(), SensorEventListener {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         } ?: run {
             Log.e("WalkingActivityService", "Step counter sensor is not present on this device")
+            startTime = SystemClock.elapsedRealtime()
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startTime = System.currentTimeMillis()
+        startTime = SystemClock.elapsedRealtime()
         return START_STICKY
     }
 
@@ -88,7 +91,7 @@ class WalkingActivityService : Service(), SensorEventListener {
                 }
                 stepsSinceStart = it.values[0].toInt() - stepsAtStart
 
-                val elapsedTime = System.currentTimeMillis() - startTime
+                val elapsedTime = SystemClock.elapsedRealtime() - startTime
 
                 Log.d("WalkingActivityService", "Tempo trascorso: $elapsedTime ms, Passi: $stepsSinceStart")
             }
@@ -109,12 +112,12 @@ class WalkingActivityService : Service(), SensorEventListener {
         val activity = Activity(
             type = "Walking",
             startTimeMillis = startTime,
-            endTimeMillis = System.currentTimeMillis(),
+            endTimeMillis = SystemClock.elapsedRealtime(),
             stepsCount = stepsSinceStart,
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            db.dao.insert(activity)
+            db.getDao().insert(activity)
         }
     }
 
