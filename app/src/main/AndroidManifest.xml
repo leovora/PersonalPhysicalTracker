@@ -2,9 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permissions -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
@@ -32,14 +29,12 @@
         <service
             android:name=".Services.DrivingActivityService"
             android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="location"/>
+            android:exported="false" />
 
         <service
-            android:name=".Services.TrackingService"
+            android:name=".Services.SittingActivityService"
             android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="location"/>
+            android:exported="false" />
 
         <!-- Activity -->
         <activity

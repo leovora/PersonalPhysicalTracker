@@ -27,6 +27,7 @@ class WalkingActivityService : Service(), SensorEventListener {
     private var startTime: Long = 0
     private var stepsAtStart = 0
     private var stepsSinceStart = 0
+    private val stepsLengthInMeters = 0.762f
 
     private val db by lazy {
         ActivityDatabase.getDatabase(this)
@@ -114,6 +115,7 @@ class WalkingActivityService : Service(), SensorEventListener {
             startTimeMillis = startTime,
             endTimeMillis = SystemClock.elapsedRealtime(),
             stepsCount = stepsSinceStart,
+            kilometers = stepsSinceStart * stepsLengthInMeters / 1000
         )
 
         CoroutineScope(Dispatchers.IO).launch {

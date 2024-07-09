@@ -10,20 +10,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import com.example.ppt.R
 import com.example.ppt.Services.DrivingActivityService
-import com.example.ppt.Services.TrackingService
+import com.example.ppt.Services.SittingActivityService
 import com.example.ppt.Services.WalkingActivityService
-import com.example.ppt.ViewModels.ActivityViewModel
-import dagger.hilt.android.AndroidEntryPoint
 
-class HomeFragment : Fragment(R.layout.fragment_home) {
-
-    private val viewModel: ActivityViewModel by viewModels()
+class HomeFragment : Fragment() {
 
     private lateinit var startWalkingButton: Button
     private lateinit var stopWalkingButton: Button
@@ -36,6 +30,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var isWalking = false
     private var isDriving = false
     private var isSitting = false
+
+    // Colori dei bottoni
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,7 +61,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         startDrivingButton.setOnClickListener {
             if (!doingActivity) {
-                startLocationUpdates()
+                startDrivingActivity()
             }
         }
 
@@ -86,6 +83,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
 
+        // Applica i colori dei bottoni correnti
+        stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), if (isWalking) R.color.red else R.color.white))
+        stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), if (isDriving) R.color.red else R.color.white))
+        stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), if (isSitting) R.color.red else R.color.white))
+
         updateButtons()
         return view
     }
@@ -95,7 +97,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         ContextCompat.startForegroundService(requireContext(), intent)
         isWalking = true
         doingActivity = true
-        startWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
         updateButtons()
     }
@@ -114,7 +115,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         ContextCompat.startForegroundService(requireContext(), intent)
         isDriving = true
         doingActivity = true
-        startDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
         updateButtons()
     }
@@ -129,11 +129,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun startSittingActivity() {
-        // Implement the logic to start sitting activity
+        val intent = Intent(requireContext(), SittingActivityService::class.java)
+        ContextCompat.startForegroundService(requireContext(), intent)
+        isSitting = true
+        doingActivity = true
+        stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+        updateButtons()
     }
 
     private fun stopSittingActivity() {
-        // Implement the logic to stop sitting activity
+        val intent = Intent(requireContext(), SittingActivityService::class.java)
+        requireContext().stopService(intent)
+        isSitting = false
+        doingActivity = false
+        stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        updateButtons()
     }
 
     private fun updateButtons() {
@@ -164,42 +174,5 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         } else {
             Toast.makeText(requireContext(), "Activity permission denied", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                startLocationUpdates()
-            }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                startLocationUpdates()
-            } else -> {
-            startLocationUpdates()
-        }
-        }
-    }
-
-
-    private fun startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            locationPermissionRequest.launch(arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION))
-            return
-        }
-        else{
-            Toast.makeText(requireContext(), "Starting Activity", Toast.LENGTH_SHORT).show()
-            //startDrivingActivity()
-        }
-
     }
 }

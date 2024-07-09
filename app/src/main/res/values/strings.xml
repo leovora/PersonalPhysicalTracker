@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PersonalPhysicalTracker</string>
+    <string name="app_name">Personal Physical Tracker</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="Keep_it_up_message">Keep it up! Your physical activity today is above this month\'s average</string>

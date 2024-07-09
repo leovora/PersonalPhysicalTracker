@@ -4,17 +4,11 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
-import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.LifecycleService
 import com.example.ppt.R
 import com.example.ppt.data.Activity
 import com.example.ppt.data.ActivityDatabase
@@ -22,8 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
-class DrivingActivityService : Service(){
+class SittingActivityService : Service() {
 
     private var startTime: Long = 0
 
@@ -42,17 +35,17 @@ class DrivingActivityService : Service(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 notificationChannelId,
-                "Driving Activity",
+                "Sitting Activity",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Channel for Driving Activity Service"
+                description = "Channel for Sitting Activity Service"
             }
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
 
         val notification: Notification = NotificationCompat.Builder(this, notificationChannelId)
-            .setContentTitle("Driving Activity")
+            .setContentTitle("Sitting Activity")
             .setSmallIcon(R.drawable.run_icon)
             .build()
 
@@ -71,7 +64,7 @@ class DrivingActivityService : Service(){
 
     private fun saveActivityToDatabase() {
         val activity = Activity(
-            type = "Driving",
+            type = "Sitting",
             startTimeMillis = startTime,
             endTimeMillis = SystemClock.elapsedRealtime(),
         )
@@ -84,5 +77,4 @@ class DrivingActivityService : Service(){
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-
 }
