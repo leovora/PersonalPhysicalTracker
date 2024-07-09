@@ -1,9 +1,8 @@
-package com.example.ppt
+package com.example.ppt.Fragments
 
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,12 +10,20 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.example.ppt.Service.DrivingActivityService
+import androidx.fragment.app.viewModels
+import com.example.ppt.R
+import com.example.ppt.Services.DrivingActivityService
+import com.example.ppt.Services.TrackingService
+import com.example.ppt.Services.WalkingActivityService
+import com.example.ppt.ViewModels.ActivityViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(R.layout.fragment_home) {
+
+    private val viewModel: ActivityViewModel by viewModels()
 
     private lateinit var startWalkingButton: Button
     private lateinit var stopWalkingButton: Button
@@ -30,27 +37,6 @@ class HomeFragment : Fragment() {
     private var isDriving = false
     private var isSitting = false
 
-    private val locationRequestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            startDrivingActivity()
-        } else {
-            Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private val stepsRequestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            startWalkingActivity()
-        } else {
-            Toast.makeText(requireContext(), "Activity permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -59,16 +45,14 @@ class HomeFragment : Fragment() {
 
         startWalkingButton = view.findViewById(R.id.StartWalking_btn)
         stopWalkingButton = view.findViewById(R.id.StopWalking_btn)
-
         startDrivingButton = view.findViewById(R.id.StartDriving_btn)
         stopDrivingButton = view.findViewById(R.id.StopDriving_btn)
-
         startSittingButton = view.findViewById(R.id.StartSitting_btn)
         stopSittingButton = view.findViewById(R.id.StopSitting_btn)
 
         startWalkingButton.setOnClickListener {
             if (!doingActivity) {
-               startWalkingActivity()
+                checkActivityPermissionAndStartWalkingActivity()
             }
         }
 
@@ -80,7 +64,7 @@ class HomeFragment : Fragment() {
 
         startDrivingButton.setOnClickListener {
             if (!doingActivity) {
-               startDrivingActivity()
+                startLocationUpdates()
             }
         }
 
@@ -104,35 +88,6 @@ class HomeFragment : Fragment() {
 
         updateButtons()
         return view
-    }
-
-    private fun checkLocationPermissionAndStartDrivingActivity() {
-        when {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                startDrivingActivity()
-            }
-            else -> {
-                locationRequestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun checkActivityPermissionAndStartWalkingActivity() {
-        when {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACTIVITY_RECOGNITION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                startWalkingActivity()
-            }
-            else -> {
-                stepsRequestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
-            }
-        }
     }
 
     private fun startWalkingActivity() {
@@ -185,5 +140,66 @@ class HomeFragment : Fragment() {
         startDrivingButton.isEnabled = !doingActivity
         startWalkingButton.isEnabled = !doingActivity
         startSittingButton.isEnabled = !doingActivity
+    }
+
+    private fun checkActivityPermissionAndStartWalkingActivity() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                startWalkingActivity()
+            }
+            else -> {
+                stepsRequestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+        }
+    }
+
+    private val stepsRequestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            startWalkingActivity()
+        } else {
+            Toast.makeText(requireContext(), "Activity permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val locationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                startLocationUpdates()
+            }
+            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                startLocationUpdates()
+            } else -> {
+            startLocationUpdates()
+        }
+        }
+    }
+
+
+    private fun startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            locationPermissionRequest.launch(arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION))
+            return
+        }
+        else{
+            Toast.makeText(requireContext(), "Starting Activity", Toast.LENGTH_SHORT).show()
+            //startDrivingActivity()
+        }
+
     }
 }

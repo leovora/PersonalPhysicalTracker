@@ -1,4 +1,4 @@
-package com.example.ppt
+package com.example.ppt.Services
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -11,14 +11,13 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import com.example.ppt.R
 import com.example.ppt.data.ActivityDatabase
-import com.example.ppt.data.entities.Activity
+import com.example.ppt.data.Activity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,17 +39,10 @@ class WalkingActivityService : Service(), SensorEventListener {
         sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateInterval = 1000L
-    private var isSensorAvailable = true
-
     override fun onCreate() {
         super.onCreate()
         startForegroundService()
         registerStepCounterSensor()
-        if (!isSensorAvailable) {
-            startUpdatingTime()
-        }
     }
 
     private fun startForegroundService() {
@@ -82,12 +74,12 @@ class WalkingActivityService : Service(), SensorEventListener {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         } ?: run {
             Log.e("WalkingActivityService", "Step counter sensor is not present on this device")
-            isSensorAvailable = false
+            startTime = SystemClock.elapsedRealtime()
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startTime = System.currentTimeMillis()
+        startTime = SystemClock.elapsedRealtime()
         return START_STICKY
     }
 
@@ -99,7 +91,7 @@ class WalkingActivityService : Service(), SensorEventListener {
                 }
                 stepsSinceStart = it.values[0].toInt() - stepsAtStart
 
-                val elapsedTime = System.currentTimeMillis() - startTime
+                val elapsedTime = SystemClock.elapsedRealtime() - startTime
 
                 Log.d("WalkingActivityService", "Tempo trascorso: $elapsedTime ms, Passi: $stepsSinceStart")
             }
@@ -113,8 +105,6 @@ class WalkingActivityService : Service(), SensorEventListener {
     override fun onDestroy() {
         saveActivityToDatabase()
         sensorManager.unregisterListener(this)
-        handler.removeCallbacksAndMessages(null)
-        showActivityToast()
         super.onDestroy()
     }
 
@@ -122,35 +112,12 @@ class WalkingActivityService : Service(), SensorEventListener {
         val activity = Activity(
             type = "Walking",
             startTimeMillis = startTime,
-            endTimeMillis = System.currentTimeMillis(),
+            endTimeMillis = SystemClock.elapsedRealtime(),
             stepsCount = stepsSinceStart,
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            db.dao.insert(activity)
-        }
-    }
-
-    //When no sensor is available count only elapsed time
-    private fun startUpdatingTime() {
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                val elapsedTime = System.currentTimeMillis() - startTime
-                Log.d("WalkingActivityService", "Elapsed time: $elapsedTime ms")
-                handler.postDelayed(this, updateInterval)
-            }
-        }, updateInterval)
-    }
-
-    private fun showActivityToast() {
-        val endTime = System.currentTimeMillis()
-        val elapsedTime = endTime - startTime
-        val minutes = (elapsedTime / 1000) / 60
-        val steps = stepsSinceStart
-
-        val message = "Stopped activity: $minutes minutes, $steps steps"
-        Handler(Looper.getMainLooper()).post {
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            db.getDao().insert(activity)
         }
     }
 
