@@ -1,4 +1,4 @@
-package com.example.ppt.Services
+package com.example.ppt.services
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -53,7 +53,7 @@ class SittingActivityService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startTime = SystemClock.elapsedRealtime()
+        startTime = System.currentTimeMillis()
         return START_STICKY
     }
 
@@ -66,7 +66,7 @@ class SittingActivityService : Service() {
         val activity = Activity(
             type = "Sitting",
             startTimeMillis = startTime,
-            endTimeMillis = SystemClock.elapsedRealtime(),
+            endTimeMillis = System.currentTimeMillis()
         )
 
         CoroutineScope(Dispatchers.IO).launch {

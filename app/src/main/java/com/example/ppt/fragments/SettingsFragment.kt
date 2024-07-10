@@ -1,4 +1,4 @@
-package com.example.ppt.Fragments
+package com.example.ppt.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,10 +9,13 @@ import com.example.ppt.R
 
 /**
  * A simple [Fragment] subclass.
- * Use the [StatsFragment.newInstance] factory method to
+ * Use the [SettingsFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class StatsFragment : Fragment() {
+class SettingsFragment : Fragment() {
+    // TODO: Rename and change types of parameters
+    private var param1: String? = null
+    private var param2: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +27,6 @@ class StatsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_stats, container, false)
+        return inflater.inflate(R.layout.fragment_settings, container, false)
     }
 }

@@ -1,4 +1,4 @@
-package com.example.ppt.Fragments
+package com.example.ppt.fragments
 
 import android.Manifest
 import android.content.Intent
@@ -12,12 +12,16 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.ppt.R
-import com.example.ppt.Services.DrivingActivityService
-import com.example.ppt.Services.SittingActivityService
-import com.example.ppt.Services.WalkingActivityService
+import com.example.ppt.services.DrivingActivityService
+import com.example.ppt.services.SittingActivityService
+import com.example.ppt.services.WalkingActivityService
+import com.example.ppt.viewModels.ActivityViewModel
 
 class HomeFragment : Fragment() {
+
+    private val viewModel : ActivityViewModel by viewModels()
 
     private lateinit var startWalkingButton: Button
     private lateinit var stopWalkingButton: Button
@@ -30,9 +34,6 @@ class HomeFragment : Fragment() {
     private var isWalking = false
     private var isDriving = false
     private var isSitting = false
-
-    // Colori dei bottoni
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,43 +51,71 @@ class HomeFragment : Fragment() {
         startWalkingButton.setOnClickListener {
             if (!doingActivity) {
                 checkActivityPermissionAndStartWalkingActivity()
+                viewModel.startWalkingActivity()
             }
         }
 
         stopWalkingButton.setOnClickListener {
             if (isWalking) {
                 stopWalkingActivity()
+                viewModel.stopWalkingActivity()
             }
         }
 
         startDrivingButton.setOnClickListener {
             if (!doingActivity) {
                 startDrivingActivity()
+                viewModel.startDrivingActivity()
             }
         }
 
         stopDrivingButton.setOnClickListener {
             if (isDriving) {
                 stopDrivingActivity()
+                viewModel.stopDrivingActivity()
             }
         }
 
         startSittingButton.setOnClickListener {
             if (!doingActivity) {
                 startSittingActivity()
+                viewModel.startSittingActivity()
             }
         }
 
         stopSittingButton.setOnClickListener {
             if (isSitting) {
                 stopSittingActivity()
+                viewModel.stopSittingActivity()
             }
         }
 
-        // Applica i colori dei bottoni correnti
-        stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), if (isWalking) R.color.red else R.color.white))
-        stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), if (isDriving) R.color.red else R.color.white))
-        stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), if (isSitting) R.color.red else R.color.white))
+        viewModel.isWalking.observe(viewLifecycleOwner) { isWalking ->
+            stopWalkingButton.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (isWalking) R.color.red else R.color.white
+                )
+            )
+        }
+
+        viewModel.isDriving.observe(viewLifecycleOwner) { isDriving ->
+            stopDrivingButton.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (isDriving) R.color.red else R.color.white
+                )
+            )
+        }
+
+        viewModel.isSitting.observe(viewLifecycleOwner) { isSitting ->
+            stopSittingButton.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (isSitting) R.color.red else R.color.white
+                )
+            )
+        }
 
         updateButtons()
         return view

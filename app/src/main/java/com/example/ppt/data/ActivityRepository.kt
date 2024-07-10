@@ -19,7 +19,9 @@ class ActivityRepository(
         return activityDao.getActivitiesByType(type)
     }
 
-    fun getActivitiesByDate(date: Long): LiveData<List<Activity>> {
-        return activityDao.getActivitiesBytDate(date)
+    fun getActivitiesByDate(dateInMillis: Long): LiveData<List<Activity>> {
+        val startOfDay = dateInMillis / 86400000 * 86400000 // Start of the day in milliseconds
+        val endOfDay = startOfDay + 86400000 - 1 // End of the day in milliseconds
+        return activityDao.getActivitiesByDate(startOfDay, endOfDay)
     }
 }

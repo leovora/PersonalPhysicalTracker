@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".Fragments.StatsFragment">
+    tools:context=".fragments.StatsFragment">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -158,6 +158,12 @@
                         android:layout_marginEnd="10dp"/>
 
                     <Spinner
+                        android:id="@+id/filterType_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"/>
+
+                    <Spinner
                         android:id="@+id/filter_spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -178,6 +184,7 @@
                 android:layout_marginTop="20dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/Activity_recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"

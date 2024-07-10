@@ -1,4 +1,4 @@
-package com.example.ppt.ViewModels
+package com.example.ppt.viewModels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -7,7 +7,7 @@ import com.example.ppt.data.Activity
 import com.example.ppt.data.ActivityRepository
 import kotlinx.coroutines.launch
 
-class ActivityViewModel(val repository: ActivityRepository) : ViewModel() {
+class StatsViewModel(private val repository: ActivityRepository): ViewModel() {
 
     fun getAllActivities(): LiveData<List<Activity>> {
         return repository.getAllActivities()
