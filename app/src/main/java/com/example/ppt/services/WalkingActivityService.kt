@@ -75,12 +75,12 @@ class WalkingActivityService : Service(), SensorEventListener {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         } ?: run {
             Log.e("WalkingActivityService", "Step counter sensor is not present on this device")
-            startTime = SystemClock.elapsedRealtime()
+            startTime = System.currentTimeMillis()
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startTime = SystemClock.elapsedRealtime()
+        startTime = System.currentTimeMillis()
         return START_STICKY
     }
 

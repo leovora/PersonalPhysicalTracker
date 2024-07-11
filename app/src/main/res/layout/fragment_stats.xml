@@ -132,7 +132,7 @@
                 android:layout_marginTop="50dp"/>
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/filterLayout"
+                android:id="@+id/TypeFilterLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
@@ -152,21 +152,55 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Filter:"
+                        android:layout_marginEnd="10dp"
                         android:fontFamily="@font/montserrat_medium"
-                        android:textSize="18sp"
-                        android:layout_marginEnd="10dp"/>
-
-                    <Spinner
-                        android:id="@+id/filterType_spinner"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"/>
+                        android:text="Type:"
+                        android:textSize="18sp" />
 
                     <Spinner
                         android:id="@+id/filter_spinner"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:entries="@array/activity_types"
+                        android:prompt="@string/select_activity_type" />
+
+                </LinearLayout>
+
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/DurationFilterLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/TypeFilterLayout"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/light_gray"
+                android:paddingHorizontal="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Duration:"
+                        android:fontFamily="@font/montserrat_medium"
+                        android:textSize="18sp"
+                        android:layout_marginEnd="10dp"/>
+
+                    <EditText
+                        android:id="@+id/DurationFilter_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="number" />
 
                 </LinearLayout>
 
@@ -179,7 +213,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/filterLayout"
+                app:layout_constraintTop_toBottomOf="@+id/DurationFilterLayout"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="20dp"/>
 
@@ -195,7 +229,5 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,18 +2,22 @@ package com.example.ppt.fragments
 
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.CalendarView
+import android.widget.EditText
+import android.widget.Spinner
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ppt.R
 import com.example.ppt.adapters.ActivityAdapter
-import com.example.ppt.data.Activity
 import com.example.ppt.data.ActivityDatabase
 import com.example.ppt.data.ActivityRepository
 import com.example.ppt.other.StatsViewModelFactory
@@ -25,6 +29,8 @@ class StatsFragment : Fragment() {
     private lateinit var activityAdapter: ActivityAdapter
     private lateinit var viewModel: StatsViewModel
     private lateinit var calendarView: CalendarView
+    private lateinit var typeFilter: Spinner
+    private lateinit var durationFilter: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,6 +40,19 @@ class StatsFragment : Fragment() {
 
         // CALENDARVIEW
         calendarView = view.findViewById(R.id.calendar)
+
+        // FILTER
+        typeFilter = view.findViewById(R.id.filter_spinner)
+        durationFilter = view.findViewById(R.id.DurationFilter_input)
+
+        ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.activity_types,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            typeFilter.adapter = adapter
+        }
 
         // RECYCLERVIEW
         recyclerView = view.findViewById(R.id.Activity_recyclerView)
@@ -47,29 +66,56 @@ class StatsFragment : Fragment() {
         val factory = StatsViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory).get(StatsViewModel::class.java)
 
-        // Observe all activities initially
+        // Initial list
         viewModel.getActivitiesByDate(System.currentTimeMillis()).observe(viewLifecycleOwner) { activities ->
             activities?.let {
                 activityAdapter.submitList(it)
             }
         }
 
-        // Set the CalendarView date change listener
+        // Calendar filter
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             val calendar = Calendar.getInstance()
             calendar.set(year, month, dayOfMonth)
             val dateInMillis = calendar.timeInMillis
-            updateActivitiesByDate(dateInMillis)
+            viewModel.setDate(dateInMillis)
+            updateActivities(dateInMillis, getTypeFilter(), getDurationFilter())
+        }
+
+        // Type filter (Spinner)
+        typeFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateActivities(viewModel.selectedDate.value ?: System.currentTimeMillis(), getTypeFilter(), getDurationFilter())
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Do nothing
+            }
+        }
+
+        // Duration filter (EditText)
+        durationFilter.doOnTextChanged { _, _, _, _ ->
+            updateActivities(viewModel.selectedDate.value ?: System.currentTimeMillis(), getTypeFilter(), getDurationFilter())
+            Log.d("DurationFilter", "Text changed")
         }
 
         return view
     }
 
-    private fun updateActivitiesByDate(dateInMillis: Long) {
-        viewModel.getActivitiesByDate(dateInMillis).observe(viewLifecycleOwner) { activities ->
+    private fun updateActivities(dateInMillis: Long, type: String?, duration: Int?) {
+        viewModel.getFilteredActivities(dateInMillis, type, duration).observe(viewLifecycleOwner) { activities ->
             activities?.let {
                 activityAdapter.submitList(it)
             }
         }
+    }
+
+    private fun getTypeFilter(): String? {
+        return typeFilter.selectedItem?.toString()
+    }
+
+    private fun getDurationFilter(): Int? {
+        val durationText = durationFilter.text.toString()
+        return if (durationText.isNotEmpty()) durationText.toInt() else null
     }
 }

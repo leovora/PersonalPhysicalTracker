@@ -71,4 +71,7 @@ dependencies {
     // dagger
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+
+    //MPAndroidChart
+    implementation(libs.mpAndroidChart)
 }

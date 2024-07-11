@@ -24,4 +24,11 @@ class ActivityRepository(
         val endOfDay = startOfDay + 86400000 - 1 // End of the day in milliseconds
         return activityDao.getActivitiesByDate(startOfDay, endOfDay)
     }
+
+    fun getFilteredActivities(dateInMillis: Long, type: String?, duration: Int?): LiveData<List<Activity>> {
+        val startOfDay = dateInMillis / 86400000 * 86400000
+        val endOfDay = startOfDay + 86400000 - 1
+        return activityDao.getFilteredActivities(startOfDay, endOfDay, type, duration)
+    }
+
 }
