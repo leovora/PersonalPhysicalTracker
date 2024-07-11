@@ -1,4 +1,4 @@
-package com.example.ppt
+package com.example.ppt.activities
 
 import android.os.Bundle
 import android.view.View
@@ -8,6 +8,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
+import com.example.ppt.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {

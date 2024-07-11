@@ -7,4 +7,8 @@
     <color name="gray">#3A3A39</color>
     <color name="light_gray">#e5e5e5</color>
     <color name="red">#E44B4B</color>
+    <color name="pie1">#D6EFD8</color>
+    <color name="pie2">#80AF81</color>
+    <color name="pie3">#508D4E</color>
+    <color name="pie4">#1A5319</color>
 </resources>

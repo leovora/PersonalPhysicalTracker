@@ -20,11 +20,11 @@ interface ActivityDao {
     @Query("SELECT * FROM activities WHERE startTimeMillis >= :startOfDay AND startTimeMillis <= :endOfDay")
     fun getActivitiesByDate(startOfDay: Long, endOfDay: Long): LiveData<List<Activity>>
 
+    @Query("SELECT * FROM activities WHERE startTimeMillis >= :startOfMonth AND startTimeMillis <= :endOfMonth")
+    fun getActivitiesByMonth(startOfMonth: Long, endOfMonth: Long): LiveData<List<Activity>>
+
     @Query("SELECT * FROM activities WHERE startTimeMillis >= :startOfDay AND startTimeMillis <= :endOfDay" +
             " AND (:type IS NULL OR :type = 'All' OR type = :type)" +
             " AND (:duration IS NULL OR ((endTimeMillis - startTimeMillis) / 60000) = :duration)")
     fun getFilteredActivities(startOfDay: Long, endOfDay: Long, type: String?, duration: Int?): LiveData<List<Activity>>
-
-    //TODO: aggiungere query per grafici
-    // "https://www.youtube.com/watch?v=TP3uxBLzlhU&list=PLQkwcJG4YTCQ6emtoqSZS2FVwZR9FT3BV&index=3"
 }

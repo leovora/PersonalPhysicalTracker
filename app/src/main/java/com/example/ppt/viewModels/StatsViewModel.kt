@@ -1,7 +1,6 @@
 package com.example.ppt.viewModels
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +20,10 @@ class StatsViewModel(private val repository: ActivityRepository): ViewModel() {
 
     fun getActivitiesByType(type: String): LiveData<List<Activity>> {
         return repository.getActivitiesByType(type)
+    }
+
+    fun getActivitiesByMonth(): LiveData<List<Activity>>{
+        return repository.getActivitiesByMonth()
     }
 
     fun getActivitiesByDate(date: Long): LiveData<List<Activity>> {

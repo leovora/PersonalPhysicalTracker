@@ -20,7 +20,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingVertical="10dp">
 
             <TextView
                 android:id="@+id/ActivityType_text"
@@ -53,7 +54,7 @@
                 android:gravity="center"
                 android:orientation="vertical"
                 android:paddingHorizontal="20dp"
-                android:paddingVertical="10dp"
+                android:layout_marginTop="10dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ActivityDate_text"
                 app:layout_constraintEnd_toEndOf="parent">

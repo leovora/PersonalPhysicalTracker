@@ -1,8 +1,8 @@
 package com.example.ppt.fragments
 
+import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,17 +11,20 @@ import android.widget.ArrayAdapter
 import android.widget.CalendarView
 import android.widget.EditText
 import android.widget.Spinner
+import androidx.cardview.widget.CardView
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ppt.R
+import com.example.ppt.activities.LineChartActivity
 import com.example.ppt.adapters.ActivityAdapter
 import com.example.ppt.data.ActivityDatabase
 import com.example.ppt.data.ActivityRepository
 import com.example.ppt.other.StatsViewModelFactory
 import com.example.ppt.viewModels.StatsViewModel
+import com.example.ppt.activities.PieChartActivity
 
 class StatsFragment : Fragment() {
 
@@ -31,12 +34,27 @@ class StatsFragment : Fragment() {
     private lateinit var calendarView: CalendarView
     private lateinit var typeFilter: Spinner
     private lateinit var durationFilter: EditText
+    private lateinit var lineChartCard: CardView
+    private lateinit var pieChartCard: CardView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_stats, container, false)
+
+        // CHARTS
+        lineChartCard = view.findViewById(R.id.LineChart_card)
+        pieChartCard = view.findViewById(R.id.PieChart_card)
+
+        // Click listeners for cards
+        lineChartCard.setOnClickListener {
+            startActivity(Intent(requireContext(), LineChartActivity::class.java))
+        }
+
+        pieChartCard.setOnClickListener {
+            startActivity(Intent(requireContext(), PieChartActivity::class.java))
+        }
 
         // CALENDARVIEW
         calendarView = view.findViewById(R.id.calendar)
@@ -86,6 +104,7 @@ class StatsFragment : Fragment() {
         typeFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 updateActivities(viewModel.selectedDate.value ?: System.currentTimeMillis(), getTypeFilter(), getDurationFilter())
+                viewModel.setType(getTypeFilter())
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -96,7 +115,7 @@ class StatsFragment : Fragment() {
         // Duration filter (EditText)
         durationFilter.doOnTextChanged { _, _, _, _ ->
             updateActivities(viewModel.selectedDate.value ?: System.currentTimeMillis(), getTypeFilter(), getDurationFilter())
-            Log.d("DurationFilter", "Text changed")
+            viewModel.setDuration(getDurationFilter())
         }
 
         return view
@@ -118,4 +137,5 @@ class StatsFragment : Fragment() {
         val durationText = durationFilter.text.toString()
         return if (durationText.isNotEmpty()) durationText.toInt() else null
     }
+
 }
