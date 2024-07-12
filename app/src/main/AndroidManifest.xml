@@ -32,6 +32,11 @@
             android:exported="false" />
 
         <service
+            android:name=".services.UnknownActivityService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
             android:name=".services.SittingActivityService"
             android:enabled="true"
             android:exported="false" />

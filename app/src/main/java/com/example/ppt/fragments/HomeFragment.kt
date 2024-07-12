@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import com.example.ppt.R
 import com.example.ppt.services.DrivingActivityService
 import com.example.ppt.services.SittingActivityService
+import com.example.ppt.services.UnknownActivityService
 import com.example.ppt.services.WalkingActivityService
 import com.example.ppt.viewModels.ActivityViewModel
 
@@ -122,6 +123,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun startWalkingActivity() {
+        stopUnknownActivityService()
         val intent = Intent(requireContext(), WalkingActivityService::class.java)
         ContextCompat.startForegroundService(requireContext(), intent)
         isWalking = true
@@ -136,10 +138,12 @@ class HomeFragment : Fragment() {
         isWalking = false
         doingActivity = false
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        startUnknownActivityService()
         updateButtons()
     }
 
     private fun startDrivingActivity() {
+        stopUnknownActivityService()
         val intent = Intent(requireContext(), DrivingActivityService::class.java)
         ContextCompat.startForegroundService(requireContext(), intent)
         isDriving = true
@@ -154,10 +158,12 @@ class HomeFragment : Fragment() {
         isDriving = false
         doingActivity = false
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        startUnknownActivityService()
         updateButtons()
     }
 
     private fun startSittingActivity() {
+        stopUnknownActivityService()
         val intent = Intent(requireContext(), SittingActivityService::class.java)
         ContextCompat.startForegroundService(requireContext(), intent)
         isSitting = true
@@ -172,6 +178,7 @@ class HomeFragment : Fragment() {
         isSitting = false
         doingActivity = false
         stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        startUnknownActivityService()
         updateButtons()
     }
 
@@ -203,5 +210,15 @@ class HomeFragment : Fragment() {
         } else {
             Toast.makeText(requireContext(), "Activity permission denied", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun stopUnknownActivityService() {
+        val intent = Intent(requireContext(), UnknownActivityService::class.java)
+        requireContext().stopService(intent)
+    }
+
+    private fun startUnknownActivityService() {
+        val intent = Intent(requireContext(), UnknownActivityService::class.java)
+        ContextCompat.startForegroundService(requireContext(), intent)
     }
 }

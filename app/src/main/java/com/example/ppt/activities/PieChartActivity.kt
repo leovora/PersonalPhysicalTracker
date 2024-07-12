@@ -57,6 +57,7 @@ class PieChartActivity : AppCompatActivity() {
                 val dataSet = PieDataSet(pieEntries, "")
                 dataSet.setColors(
                     intArrayOf(
+                        R.color.pie1,
                         R.color.pie2,
                         R.color.pie3,
                         R.color.pie4,

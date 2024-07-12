@@ -9,6 +9,7 @@
         <item>Walking</item>
         <item>Driving</item>
         <item>Sitting</item>
+        <item>Unknown</item>
     </string-array>
 
     <string name="select_activity_type">Select activity type</string>

@@ -1,5 +1,6 @@
 package com.example.ppt.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,7 @@ import androidx.core.view.updatePadding
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
 import com.example.ppt.R
+import com.example.ppt.services.UnknownActivityService
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -34,5 +36,8 @@ class MainActivity : AppCompatActivity() {
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.btm_nav)
         val navController = Navigation.findNavController(this, R.id.host_fragment)
         NavigationUI.setupWithNavController(bottomNavigation, navController)
+
+        val intent = Intent(this, UnknownActivityService::class.java)
+        startService(intent)
     }
 }
