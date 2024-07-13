@@ -4,10 +4,27 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class ActivityViewModel: ViewModel() {
+class ActivityViewModel : ViewModel() {
+
     private val _isWalking = MutableLiveData(false)
     private val _isDriving = MutableLiveData(false)
     private val _isSitting = MutableLiveData(false)
+    private val _walkingSteps = MutableLiveData<Int>()
+    private val _walkingMins = MutableLiveData<Int>()
+    private val _drivingMins = MutableLiveData<Int>()
+    private val _sittingMins = MutableLiveData<Int>()
+
+    val walkingSteps: LiveData<Int>
+        get() = _walkingSteps
+
+    val walkingMins: LiveData<Int>
+        get() = _walkingMins
+
+    val drivingMins: LiveData<Int>
+        get() = _drivingMins
+
+    val sittingMins: LiveData<Int>
+        get() = _sittingMins
 
     val isWalking: LiveData<Boolean>
         get() = _isWalking
@@ -17,6 +34,22 @@ class ActivityViewModel: ViewModel() {
 
     val isSitting: LiveData<Boolean>
         get() = _isSitting
+
+    fun updateWalkingSteps(steps: Int) {
+        _walkingSteps.value = steps
+    }
+
+    fun updateWalkingMins(mins: Int) {
+        _walkingMins.value = mins
+    }
+
+    fun updateDrivingMins(mins: Int) {
+        _drivingMins.value = mins
+    }
+
+    fun updateSittingMins(mins: Int) {
+        _sittingMins.value = mins
+    }
 
     fun startWalkingActivity() {
         _isWalking.value = true

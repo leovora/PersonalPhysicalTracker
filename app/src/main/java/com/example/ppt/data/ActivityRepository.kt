@@ -38,5 +38,28 @@ class ActivityRepository(
         return activityDao.getFilteredActivities(startOfDay, endOfDay, type, duration)
     }
 
+    fun getTotalStepsForDay(dateInMillis: Long): LiveData<Int> {
+        val startOfDay = dateInMillis / 86400000 * 86400000 // Start of the day in milliseconds
+        val endOfDay = startOfDay + 86400000 - 1 // End of the day in milliseconds
+        return activityDao.getTotalStepsForDay(startOfDay, endOfDay)
+    }
+
+    fun getTotalWalkingTimeForDay(dateInMillis: Long): LiveData<Int> {
+        val startOfDay = dateInMillis / 86400000 * 86400000 // Start of the day in milliseconds
+        val endOfDay = startOfDay + 86400000 - 1 // End of the day in milliseconds
+        return activityDao.getTotalWalkingTimeForDay(startOfDay, endOfDay)
+    }
+
+    fun getTotalDrivingTimeForDay(dateInMillis: Long): LiveData<Int> {
+        val startOfDay = dateInMillis / 86400000 * 86400000 // Start of the day in milliseconds
+        val endOfDay = startOfDay + 86400000 - 1 // End of the day in milliseconds
+        return activityDao.getTotalDrivingTimeForDay(startOfDay, endOfDay)
+    }
+
+    fun getTotalSittingTimeForDay(dateInMillis: Long): LiveData<Int> {
+        val startOfDay = dateInMillis / 86400000 * 86400000 // Start of the day in milliseconds
+        val endOfDay = startOfDay + 86400000 - 1 // End of the day in milliseconds
+        return activityDao.getTotalSittingTimeForDay(startOfDay, endOfDay)
+    }
 
 }

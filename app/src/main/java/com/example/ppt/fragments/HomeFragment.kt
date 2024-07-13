@@ -8,23 +8,34 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import com.example.ppt.R
+import com.example.ppt.data.ActivityDatabase
+import com.example.ppt.data.ActivityRepository
+import com.example.ppt.other.StatsViewModelFactory
 import com.example.ppt.services.DrivingActivityService
 import com.example.ppt.services.SittingActivityService
 import com.example.ppt.services.UnknownActivityService
 import com.example.ppt.services.WalkingActivityService
 import com.example.ppt.viewModels.ActivityViewModel
 import com.example.ppt.viewModels.SharedViewModel
+import com.example.ppt.viewModels.StatsViewModel
 
 class HomeFragment : Fragment() {
 
     private val viewModel: ActivityViewModel by activityViewModels()
     private val sharedViewModel: SharedViewModel by activityViewModels()
+
+    private lateinit var database: ActivityDatabase
+    private lateinit var repository: ActivityRepository
+    private lateinit var factory: StatsViewModelFactory
+    private lateinit var statsViewmodel: StatsViewModel
 
     private lateinit var startWalkingButton: Button
     private lateinit var stopWalkingButton: Button
@@ -32,11 +43,27 @@ class HomeFragment : Fragment() {
     private lateinit var stopDrivingButton: Button
     private lateinit var startSittingButton: Button
     private lateinit var stopSittingButton: Button
+    private lateinit var walkingStepsText: TextView
+    private lateinit var walkingMinsText: TextView
+    private lateinit var drivingMinsText: TextView
+    private lateinit var sittingMinsText: TextView
 
     private var doingActivity = false
     private var isWalking = false
     private var isDriving = false
     private var isSitting = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onAttach(context: android.content.Context) {
+        super.onAttach(context)
+        database = ActivityDatabase.getDatabase(requireContext())
+        repository = ActivityRepository(database.getDao())
+        factory = StatsViewModelFactory(repository)
+        statsViewmodel = ViewModelProvider(this, factory).get(StatsViewModel::class.java)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,6 +77,10 @@ class HomeFragment : Fragment() {
         stopDrivingButton = view.findViewById(R.id.StopDriving_btn)
         startSittingButton = view.findViewById(R.id.StartSitting_btn)
         stopSittingButton = view.findViewById(R.id.StopSitting_btn)
+        walkingStepsText = view.findViewById(R.id.walking_steps_text)
+        walkingMinsText = view.findViewById(R.id.walking_mins_text)
+        drivingMinsText = view.findViewById(R.id.driving_mins_text)
+        sittingMinsText = view.findViewById(R.id.sitting_mins_text)
 
         startWalkingButton.setOnClickListener {
             if (!doingActivity) {
@@ -124,7 +155,24 @@ class HomeFragment : Fragment() {
             updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
         }
 
+        viewModel.walkingSteps.observe(viewLifecycleOwner) { steps ->
+            walkingStepsText.text = steps.toString()
+        }
+
+        viewModel.walkingMins.observe(viewLifecycleOwner) { mins ->
+            walkingMinsText.text = (mins / 60000).toString()
+        }
+
+        viewModel.drivingMins.observe(viewLifecycleOwner) { mins ->
+            drivingMinsText.text = (mins / 60000).toString()
+        }
+
+        viewModel.sittingMins.observe(viewLifecycleOwner) { mins ->
+            sittingMinsText.text = (mins / 60000).toString()
+        }
+
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateDailyStats()
         return view
     }
 
@@ -144,8 +192,10 @@ class HomeFragment : Fragment() {
         isWalking = false
         doingActivity = false
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+
         startUnknownActivityService()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateDailyStats()
     }
 
     private fun startDrivingActivity() {
@@ -166,6 +216,7 @@ class HomeFragment : Fragment() {
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         startUnknownActivityService()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateDailyStats()
     }
 
     private fun startSittingActivity() {
@@ -186,6 +237,7 @@ class HomeFragment : Fragment() {
         stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         startUnknownActivityService()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateDailyStats()
     }
 
     private fun updateButtons(autoRecognitionActive: Boolean) {
@@ -210,9 +262,7 @@ class HomeFragment : Fragment() {
                 stepsRequestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
             }
         }
-    }
-
-    private val stepsRequestPermissionLauncher = registerForActivityResult(
+    }private val stepsRequestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
@@ -231,5 +281,29 @@ class HomeFragment : Fragment() {
     private fun startUnknownActivityService() {
         val intent = Intent(requireContext(), UnknownActivityService::class.java)
         ContextCompat.startForegroundService(requireContext(), intent)
+    }
+
+    private fun updateDailyStats() {
+        val currentMillis = System.currentTimeMillis()
+        statsViewmodel.getTotalStepsForDay(currentMillis).observe(viewLifecycleOwner) { steps ->
+            steps?.let {
+                viewModel.updateWalkingSteps(it)
+            }
+        }
+        statsViewmodel.getTotalWalkingTimeForDay(currentMillis).observe(viewLifecycleOwner) { mins ->
+            mins?.let {
+                viewModel.updateWalkingMins(it)
+            }
+        }
+        statsViewmodel.getTotalDrivingTimeForDay(currentMillis).observe(viewLifecycleOwner) { mins ->
+            mins?.let {
+                viewModel.updateDrivingMins(it)
+            }
+        }
+        statsViewmodel.getTotalSittingTimeForDay(currentMillis).observe(viewLifecycleOwner) { mins ->
+            mins?.let {
+                viewModel.updateSittingMins(it)
+            }
+        }
     }
 }

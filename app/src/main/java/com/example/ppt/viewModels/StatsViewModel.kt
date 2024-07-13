@@ -30,6 +30,22 @@ class StatsViewModel(private val repository: ActivityRepository): ViewModel() {
         return repository.getActivitiesByDate(date)
     }
 
+    fun getTotalStepsForDay(dateInMillis: Long): LiveData<Int> {
+        return repository.getTotalStepsForDay(dateInMillis)
+    }
+
+    fun getTotalWalkingTimeForDay(dateInMillis: Long): LiveData<Int> {
+        return repository.getTotalWalkingTimeForDay(dateInMillis)
+    }
+
+    fun getTotalDrivingTimeForDay(dateInMillis: Long): LiveData<Int> {
+        return repository.getTotalDrivingTimeForDay(dateInMillis)
+    }
+
+    fun getTotalSittingTimeForDay(dateInMillis: Long): LiveData<Int> {
+        return repository.getTotalSittingTimeForDay(dateInMillis)
+    }
+
     //insert with coroutine
     fun insertActivity(activity: Activity) {
         viewModelScope.launch {
