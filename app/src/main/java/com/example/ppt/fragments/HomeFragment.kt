@@ -1,9 +1,6 @@
 package com.example.ppt.fragments
 
 import android.Manifest
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -15,18 +12,19 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import com.example.ppt.R
-import com.example.ppt.receivers.NotificationBroadcastReceiver
 import com.example.ppt.services.DrivingActivityService
 import com.example.ppt.services.SittingActivityService
 import com.example.ppt.services.UnknownActivityService
 import com.example.ppt.services.WalkingActivityService
 import com.example.ppt.viewModels.ActivityViewModel
+import com.example.ppt.viewModels.SharedViewModel
 
 class HomeFragment : Fragment() {
 
-    private val viewModel : ActivityViewModel by viewModels()
+    private val viewModel: ActivityViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     private lateinit var startWalkingButton: Button
     private lateinit var stopWalkingButton: Button
@@ -121,7 +119,12 @@ class HomeFragment : Fragment() {
                 )
             )
         }
-        updateButtons()
+
+        sharedViewModel.isAutoRecognitionActive.observe(viewLifecycleOwner) { isActive ->
+            updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        }
+
+        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
         return view
     }
 
@@ -132,7 +135,7 @@ class HomeFragment : Fragment() {
         isWalking = true
         doingActivity = true
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
-        updateButtons()
+        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
     private fun stopWalkingActivity() {
@@ -142,7 +145,7 @@ class HomeFragment : Fragment() {
         doingActivity = false
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         startUnknownActivityService()
-        updateButtons()
+        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
     private fun startDrivingActivity() {
@@ -152,7 +155,7 @@ class HomeFragment : Fragment() {
         isDriving = true
         doingActivity = true
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
-        updateButtons()
+        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
     private fun stopDrivingActivity() {
@@ -162,7 +165,7 @@ class HomeFragment : Fragment() {
         doingActivity = false
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         startUnknownActivityService()
-        updateButtons()
+        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
     private fun startSittingActivity() {
@@ -172,7 +175,7 @@ class HomeFragment : Fragment() {
         isSitting = true
         doingActivity = true
         stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
-        updateButtons()
+        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
     private fun stopSittingActivity() {
@@ -182,13 +185,17 @@ class HomeFragment : Fragment() {
         doingActivity = false
         stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         startUnknownActivityService()
-        updateButtons()
+        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
-    private fun updateButtons() {
-        startDrivingButton.isEnabled = !doingActivity
-        startWalkingButton.isEnabled = !doingActivity
-        startSittingButton.isEnabled = !doingActivity
+    private fun updateButtons(autoRecognitionActive: Boolean) {
+        startDrivingButton.isEnabled = !autoRecognitionActive && !doingActivity
+        startWalkingButton.isEnabled = !autoRecognitionActive && !doingActivity
+        startSittingButton.isEnabled = !autoRecognitionActive && !doingActivity
+
+        stopWalkingButton.isEnabled = !autoRecognitionActive && isWalking
+        stopDrivingButton.isEnabled = !autoRecognitionActive && isDriving
+        stopSittingButton.isEnabled = !autoRecognitionActive && isSitting
     }
 
     private fun checkActivityPermissionAndStartWalkingActivity() {
@@ -211,7 +218,8 @@ class HomeFragment : Fragment() {
         if (isGranted) {
             startWalkingActivity()
         } else {
-            Toast.makeText(requireContext(), "Activity permission denied", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Activity permission denied", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 

@@ -41,4 +41,10 @@ class ActivityViewModel: ViewModel() {
     fun stopSittingActivity() {
         _isSitting.value = false
     }
+
+    fun resetActivities() {
+        _isWalking.value = false
+        _isDriving.value = false
+        _isSitting.value = false
+    }
 }

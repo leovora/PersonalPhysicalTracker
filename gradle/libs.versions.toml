@@ -21,6 +21,7 @@ org-jetbrains-kotlin-kapt = "1.8.0"
 lifecycleService = "2.8.3"
 hilt = "2.44"
 mpAndroidChart = "3.1.0"
+playServicesLocation = "21.3.0"
 
 
 [libraries]
@@ -46,6 +47,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 easypermissions = { group = "pub.devrel", name = "easypermissions", version = "3.0.0" }
 androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycleService" }
 mpAndroidChart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpAndroidChart" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 
 [plugins]
