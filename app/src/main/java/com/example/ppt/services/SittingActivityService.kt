@@ -3,13 +3,16 @@ package com.example.ppt.services
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
-import android.os.SystemClock
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import com.example.ppt.R
+import com.example.ppt.activities.MainActivity
 import com.example.ppt.data.Activity
 import com.example.ppt.data.ActivityDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +22,9 @@ import kotlinx.coroutines.launch
 class SittingActivityService : Service() {
 
     private var startTime: Long = 0
+    private lateinit var notificationManager: NotificationManager
+    private lateinit var handler: Handler
+    private lateinit var notificationRunnable: Runnable
 
     private val db by lazy {
         ActivityDatabase.getDatabase(this)
@@ -27,10 +33,17 @@ class SittingActivityService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForegroundService()
+        handler = Handler(Looper.getMainLooper())
+        notificationRunnable = Runnable {
+            sendNotification()
+        }
+        handler.postDelayed(notificationRunnable, 40 * 60 * 1000) // 40 minutes delay
     }
 
     private fun startForegroundService() {
-        val notificationChannelId = "DRIVING_ACTIVITY_CHANNEL"
+        notificationManager = getSystemService(NotificationManager::class.java)
+
+        val notificationChannelId = "SITTING_ACTIVITY_CHANNEL"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -40,7 +53,6 @@ class SittingActivityService : Service() {
             ).apply {
                 description = "Channel for Sitting Activity Service"
             }
-            val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
 
@@ -58,6 +70,7 @@ class SittingActivityService : Service() {
     }
 
     override fun onDestroy() {
+        handler.removeCallbacks(notificationRunnable)
         saveActivityToDatabase()
         super.onDestroy()
     }
@@ -72,6 +85,21 @@ class SittingActivityService : Service() {
         CoroutineScope(Dispatchers.IO).launch {
             db.getDao().insert(activity)
         }
+    }
+
+    private fun sendNotification() {
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val notification: Notification = NotificationCompat.Builder(this, "SITTING_ACTIVITY_CHANNEL")
+            .setContentTitle("Time to Move!")
+            .setContentText("You've been sitting for 40 minutes. Stand up and take a walk!")
+            .setSmallIcon(R.drawable.notification_icn)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(2, notification)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

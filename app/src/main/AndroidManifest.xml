@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".BaseApplication"
@@ -53,6 +54,8 @@
         </activity>
         <activity android:name=".activities.PieChartActivity" />
         <activity android:name=".activities.LineChartActivity" />
+
+        <receiver android:name=".receivers.NotificationBroadcastReceiver" />
     </application>
 
 </manifest>
