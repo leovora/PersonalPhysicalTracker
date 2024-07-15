@@ -25,27 +25,14 @@ class AutoRecognitionService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
         startForegroundService()
         registerActivityTransitions()
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "AUTO_RECOGNITION_CHANNEL",
-                "Auto Recognition Service",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
-        }
     }
 
     private fun startForegroundService() {
         notificationManager = getSystemService(NotificationManager::class.java)
 
-        val notificationChannelId = "AUTO_RECOGNITION_CHANNEL"
+        val notificationChannelId = "AUTO_RECOGNITION_ACTIVITY_CHANNEL"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(

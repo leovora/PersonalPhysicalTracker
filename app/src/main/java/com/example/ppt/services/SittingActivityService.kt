@@ -37,7 +37,7 @@ class SittingActivityService : Service() {
         notificationRunnable = Runnable {
             sendNotification()
         }
-        handler.postDelayed(notificationRunnable, 40 * 60 * 1000) // 40 minutes delay
+        handler.postDelayed(notificationRunnable, 2400000) //40 * 60 * 1000    40 minutes delay
     }
 
     private fun startForegroundService() {

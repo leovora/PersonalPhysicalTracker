@@ -1,24 +1,25 @@
 package com.example.ppt.viewModels
 
-import android.app.Application
-import android.content.Context
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 
-class ActivityViewModel(application: Application) : AndroidViewModel(application) {
+class SharedViewModel: ViewModel() {
 
     private val _isWalking = MutableLiveData(false)
     private val _isDriving = MutableLiveData(false)
     private val _isSitting = MutableLiveData(false)
+    private val _isDoingActivity = MutableLiveData(false)
     private val _walkingSteps = MutableLiveData<Int>()
     private val _walkingMins = MutableLiveData<Int>()
     private val _drivingMins = MutableLiveData<Int>()
     private val _sittingMins = MutableLiveData<Int>()
     private val _isAutoRecognitionActive = MutableLiveData(false)
-    private val sharedPreferences = application.getSharedPreferences("com.example.ppt", Context.MODE_PRIVATE)
-    private val _dailyGoal = MutableLiveData<Float>(sharedPreferences.getFloat("dailyGoal", 2500f))
+    private val _dailyGoal = MutableLiveData<Float>(2500f)
     private val _isDailyGoalReached = MutableLiveData(false)
+
+    val isAutoRecognitionActive: LiveData<Boolean>
+        get() = _isAutoRecognitionActive
 
     val walkingSteps: LiveData<Int>
         get() = _walkingSteps
@@ -41,14 +42,14 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
     val isSitting: LiveData<Boolean>
         get() = _isSitting
 
-    val isAutoRecognitionActive: LiveData<Boolean>
-        get() = _isAutoRecognitionActive
-
-    val isDailyGoalReached: LiveData<Boolean>
-        get() = _isDailyGoalReached
+    val isDoingActivity: LiveData<Boolean>
+        get() = _isDoingActivity
 
     val dailyGoal: LiveData<Float>
         get() = _dailyGoal
+
+    val isDailyGoalReached: LiveData<Boolean>
+        get() = _isDailyGoalReached
 
     fun updateWalkingSteps(steps: Int) {
         _walkingSteps.value = steps
@@ -90,10 +91,19 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
         _isSitting.value = false
     }
 
+    fun startDoingActivityActivity() {
+        _isDoingActivity.value = true
+    }
+
+    fun stopDoingActivityActivity() {
+        _isDoingActivity.value = false
+    }
+
     fun resetActivities() {
         _isWalking.value = false
         _isDriving.value = false
         _isSitting.value = false
+        _isDoingActivity.value = false
     }
 
     fun setAutoRecognitionActive(active: Boolean) {
@@ -106,7 +116,6 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
 
     fun updateDailyGoal(goal: Float) {
         _dailyGoal.value = goal
-        sharedPreferences.edit().putFloat("dailyGoal", goal).apply()
     }
 
 }

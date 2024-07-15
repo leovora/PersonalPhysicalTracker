@@ -4,22 +4,25 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.example.ppt.R
 import com.example.ppt.data.ActivityDatabase
 import com.example.ppt.data.ActivityRepository
 import com.example.ppt.other.ActivityViewModelFactory
 import com.example.ppt.other.StatsViewModelFactory
-import com.example.ppt.viewModels.ActivityViewModel
+import com.example.ppt.viewModels.GoalViewModel
+import com.example.ppt.viewModels.SharedViewModel
 import com.example.ppt.viewModels.StatsViewModel
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
+import androidx.fragment.app.activityViewModels
 
 class DailyGoalActivity : AppCompatActivity() {
 
     private lateinit var backButton: Button
     private lateinit var progressBar: CircularProgressBar
     private lateinit var statsViewModel: StatsViewModel
-    private lateinit var activityViewModel: ActivityViewModel
+    private lateinit var activityViewModel: GoalViewModel
 
     private lateinit var currentSteps: TextView
     private lateinit var goal: TextView
@@ -42,7 +45,7 @@ class DailyGoalActivity : AppCompatActivity() {
 
         val application = this.application
         val factory = ActivityViewModelFactory(application)
-        activityViewModel = ViewModelProvider(this, factory)[ActivityViewModel::class.java]
+        activityViewModel = ViewModelProvider(this, factory)[GoalViewModel::class.java]
 
         progressBar = findViewById(R.id.progressBar)
 

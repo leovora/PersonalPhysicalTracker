@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,14 +24,16 @@ import com.example.ppt.services.DrivingActivityService
 import com.example.ppt.services.SittingActivityService
 import com.example.ppt.services.UnknownActivityService
 import com.example.ppt.services.WalkingActivityService
-import com.example.ppt.viewModels.ActivityViewModel
+import com.example.ppt.viewModels.GoalViewModel
+import com.example.ppt.viewModels.SharedViewModel
 
 class SettingsFragment : Fragment() {
 
     private lateinit var autoRecognitionSwitch: SwitchCompat
     private lateinit var goalInput: NumberPicker
     private lateinit var saveButton: Button
-    private lateinit var activityViewModel: ActivityViewModel
+    private lateinit var goalViewModel: GoalViewModel
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,7 +43,7 @@ class SettingsFragment : Fragment() {
 
         val application = requireActivity().application
         val factory = ActivityViewModelFactory(application)
-        activityViewModel = ViewModelProvider(this, factory)[ActivityViewModel::class.java]
+        goalViewModel = ViewModelProvider(this, factory)[GoalViewModel::class.java]
 
         goalInput = view.findViewById(R.id.dailyGoal_NumberPicker)
         saveButton = view.findViewById(R.id.saveDailyGoal_button)
@@ -49,13 +52,14 @@ class SettingsFragment : Fragment() {
         goalInput.minValue = 0
         goalInput.maxValue = 100000
 
-        activityViewModel.dailyGoal.observe(viewLifecycleOwner) { goalValue ->
+        goalViewModel.dailyGoal.observe(viewLifecycleOwner) { goalValue ->
             goalInput.value = goalValue.toInt()
         }
 
         saveButton.setOnClickListener {
             val newGoal = goalInput.value
-            activityViewModel.updateDailyGoal(newGoal.toFloat())
+            goalViewModel.updateDailyGoal(newGoal.toFloat())
+            sharedViewModel.updateDailyGoal(newGoal.toFloat())
             Toast.makeText(requireContext(), "Daily goal updated to $newGoal steps", Toast.LENGTH_SHORT).show()
         }
 
@@ -86,17 +90,17 @@ class SettingsFragment : Fragment() {
 
     private fun startAutoRecognitionService() {
         stopServices()
-        activityViewModel.resetActivities()
+        sharedViewModel.resetActivities()
+        sharedViewModel.setAutoRecognitionActive(true)
 
         val intent = Intent(requireContext(), AutoRecognitionService::class.java)
         requireContext().startService(intent)
-        activityViewModel.setAutoRecognitionActive(true)
     }
 
     private fun stopAutoRecognitionService() {
         val intent = Intent(requireContext(), AutoRecognitionService::class.java)
         requireContext().stopService(intent)
-        activityViewModel.setAutoRecognitionActive(false)
+        sharedViewModel.setAutoRecognitionActive(false)
         val intentUnknownActivity = Intent(requireContext(), UnknownActivityService::class.java)
         requireContext().startService(intentUnknownActivity)
     }
