@@ -75,4 +75,7 @@ dependencies {
 
     //MPAndroidChart
     implementation(libs.mpAndroidChart)
+
+    //progressbar
+    implementation(libs.progressbar)
 }

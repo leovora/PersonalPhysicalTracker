@@ -22,6 +22,8 @@ lifecycleService = "2.8.3"
 hilt = "2.44"
 mpAndroidChart = "3.1.0"
 playServicesLocation = "21.3.0"
+progress-bar = "3.1.0"
+uiDesktop = "1.6.8"
 
 
 [libraries]
@@ -48,6 +50,8 @@ easypermissions = { group = "pub.devrel", name = "easypermissions", version = "3
 androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycleService" }
 mpAndroidChart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpAndroidChart" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+progressbar = {group = "com.mikhaellopez", name = "circularprogressbar", version.ref = "progress-bar"}
+androidx-ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
 
 
 [plugins]

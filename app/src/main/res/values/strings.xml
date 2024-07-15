@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Personal Physical Tracker</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="Keep_it_up_message">Keep it up! Your physical activity today is above this month\'s average</string>
-    <string name="Take_a_walk_message">Your physical activity today is under this month\'s average. Take a walk!</string>
+    <string name="Keep_it_up_message">Keep it up! You completed your daily goal, but I think you can do even more!</string>
+    <string name="Take_a_walk_message">You still haven\'t completed your daily goal. Take a walk!</string>
     <string name="youre_doing_great_message">You\'re doing great!</string>
     <string name="youre_kinda_static">You\'re kinda static!</string>
 

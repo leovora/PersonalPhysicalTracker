@@ -22,6 +22,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/firstCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,7 +44,8 @@
                 android:text="Automatic activity tracker"
                 android:fontFamily="@font/montserrat_medium"
                 android:textSize="18sp"
-                android:layout_weight="2"/>
+                android:layout_weight="2"
+                android:textAlignment="center"/>
 
             <View
                 android:layout_width="0dp"
@@ -55,6 +57,60 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/firstCardView"
+        android:backgroundTint="@color/light_gray"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="30dp"
+        app:cardCornerRadius="15dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set daily goal"
+                android:fontFamily="@font/montserrat_medium"
+                android:textSize="18sp"
+                android:layout_weight="2"
+                android:textAlignment="center"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+
+            <NumberPicker
+                android:id="@+id/dailyGoal_NumberPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <Button
+                android:id="@+id/saveDailyGoal_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="save"
+                android:layout_marginStart="3dp"/>
+
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

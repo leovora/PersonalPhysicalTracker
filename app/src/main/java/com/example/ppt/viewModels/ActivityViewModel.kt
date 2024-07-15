@@ -1,10 +1,12 @@
 package com.example.ppt.viewModels
 
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 
-class ActivityViewModel : ViewModel() {
+class ActivityViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isWalking = MutableLiveData(false)
     private val _isDriving = MutableLiveData(false)
@@ -13,6 +15,10 @@ class ActivityViewModel : ViewModel() {
     private val _walkingMins = MutableLiveData<Int>()
     private val _drivingMins = MutableLiveData<Int>()
     private val _sittingMins = MutableLiveData<Int>()
+    private val _isAutoRecognitionActive = MutableLiveData(false)
+    private val sharedPreferences = application.getSharedPreferences("com.example.ppt", Context.MODE_PRIVATE)
+    private val _dailyGoal = MutableLiveData<Float>(sharedPreferences.getFloat("dailyGoal", 2500f))
+    private val _isDailyGoalReached = MutableLiveData(false)
 
     val walkingSteps: LiveData<Int>
         get() = _walkingSteps
@@ -34,6 +40,15 @@ class ActivityViewModel : ViewModel() {
 
     val isSitting: LiveData<Boolean>
         get() = _isSitting
+
+    val isAutoRecognitionActive: LiveData<Boolean>
+        get() = _isAutoRecognitionActive
+
+    val isDailyGoalReached: LiveData<Boolean>
+        get() = _isDailyGoalReached
+
+    val dailyGoal: LiveData<Float>
+        get() = _dailyGoal
 
     fun updateWalkingSteps(steps: Int) {
         _walkingSteps.value = steps
@@ -80,4 +95,18 @@ class ActivityViewModel : ViewModel() {
         _isDriving.value = false
         _isSitting.value = false
     }
+
+    fun setAutoRecognitionActive(active: Boolean) {
+        _isAutoRecognitionActive.value = active
+    }
+
+    fun checkDailyGoalReached(steps: Int) {
+        _isDailyGoalReached.value = steps >= (_dailyGoal.value ?: 0f)
+    }
+
+    fun updateDailyGoal(goal: Float) {
+        _dailyGoal.value = goal
+        sharedPreferences.edit().putFloat("dailyGoal", goal).apply()
+    }
+
 }

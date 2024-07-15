@@ -11,30 +11,30 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.example.ppt.R
+import com.example.ppt.activities.DailyGoalActivity
 import com.example.ppt.data.ActivityDatabase
 import com.example.ppt.data.ActivityRepository
+import com.example.ppt.other.ActivityViewModelFactory
 import com.example.ppt.other.StatsViewModelFactory
 import com.example.ppt.services.DrivingActivityService
 import com.example.ppt.services.SittingActivityService
 import com.example.ppt.services.UnknownActivityService
 import com.example.ppt.services.WalkingActivityService
 import com.example.ppt.viewModels.ActivityViewModel
-import com.example.ppt.viewModels.SharedViewModel
 import com.example.ppt.viewModels.StatsViewModel
 
 class HomeFragment : Fragment() {
 
-    private val viewModel: ActivityViewModel by activityViewModels()
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private lateinit var viewModel: ActivityViewModel
 
     private lateinit var database: ActivityDatabase
     private lateinit var repository: ActivityRepository
-    private lateinit var factory: StatsViewModelFactory
+    private lateinit var statsFactory: StatsViewModelFactory
     private lateinit var statsViewmodel: StatsViewModel
 
     private lateinit var startWalkingButton: Button
@@ -47,6 +47,9 @@ class HomeFragment : Fragment() {
     private lateinit var walkingMinsText: TextView
     private lateinit var drivingMinsText: TextView
     private lateinit var sittingMinsText: TextView
+    private lateinit var progressBarCard: CardView
+    private lateinit var messageTitle: TextView
+    private lateinit var messageDescription: TextView
 
     private var doingActivity = false
     private var isWalking = false
@@ -61,8 +64,12 @@ class HomeFragment : Fragment() {
         super.onAttach(context)
         database = ActivityDatabase.getDatabase(requireContext())
         repository = ActivityRepository(database.getDao())
-        factory = StatsViewModelFactory(repository)
-        statsViewmodel = ViewModelProvider(this, factory).get(StatsViewModel::class.java)
+        statsFactory = StatsViewModelFactory(repository)
+        statsViewmodel = ViewModelProvider(this, statsFactory).get(StatsViewModel::class.java)
+
+        val application = requireActivity().application
+        val factory = ActivityViewModelFactory(application)
+        viewModel = ViewModelProvider(this, factory)[ActivityViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -81,6 +88,9 @@ class HomeFragment : Fragment() {
         walkingMinsText = view.findViewById(R.id.walking_mins_text)
         drivingMinsText = view.findViewById(R.id.driving_mins_text)
         sittingMinsText = view.findViewById(R.id.sitting_mins_text)
+        progressBarCard = view.findViewById(R.id.messageCard)
+        messageTitle = view.findViewById(R.id.message_title)
+        messageDescription = view.findViewById(R.id.message_description)
 
         startWalkingButton.setOnClickListener {
             if (!doingActivity) {
@@ -151,12 +161,13 @@ class HomeFragment : Fragment() {
             )
         }
 
-        sharedViewModel.isAutoRecognitionActive.observe(viewLifecycleOwner) { isActive ->
-            updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        viewModel.isAutoRecognitionActive.observe(viewLifecycleOwner) { isActive ->
+            updateButtons(viewModel.isAutoRecognitionActive.value == true)
         }
 
         viewModel.walkingSteps.observe(viewLifecycleOwner) { steps ->
             walkingStepsText.text = steps.toString()
+            viewModel.checkDailyGoalReached(steps)
         }
 
         viewModel.walkingMins.observe(viewLifecycleOwner) { mins ->
@@ -171,7 +182,21 @@ class HomeFragment : Fragment() {
             sittingMinsText.text = (mins / 60000).toString()
         }
 
-        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        progressBarCard.setOnClickListener {
+            startActivity(Intent(requireContext(), DailyGoalActivity::class.java))
+        }
+
+        viewModel.isDailyGoalReached.observe(viewLifecycleOwner) { isReached ->
+            if (isReached) {
+                messageTitle.text = "You\'re doing great!"
+                messageDescription.text = "Keep it up! You completed your daily goal, but I think you can do even more!"
+            } else {
+                messageTitle.text = "You\'re kinda static!"
+                messageDescription.text = "You still haven\'t completed your daily goal. Take a walk!"
+            }
+        }
+
+        updateButtons(viewModel.isAutoRecognitionActive.value == true)
         updateDailyStats()
         return view
     }
@@ -183,7 +208,7 @@ class HomeFragment : Fragment() {
         isWalking = true
         doingActivity = true
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
-        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateButtons(viewModel.isAutoRecognitionActive.value == true)
     }
 
     private fun stopWalkingActivity() {
@@ -194,7 +219,7 @@ class HomeFragment : Fragment() {
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
 
         startUnknownActivityService()
-        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateButtons(viewModel.isAutoRecognitionActive.value == true)
         updateDailyStats()
     }
 
@@ -205,7 +230,7 @@ class HomeFragment : Fragment() {
         isDriving = true
         doingActivity = true
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
-        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateButtons(viewModel.isAutoRecognitionActive.value == true)
     }
 
     private fun stopDrivingActivity() {
@@ -215,18 +240,16 @@ class HomeFragment : Fragment() {
         doingActivity = false
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         startUnknownActivityService()
-        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateButtons(viewModel.isAutoRecognitionActive.value == true)
         updateDailyStats()
-    }
-
-    private fun startSittingActivity() {
+    }private fun startSittingActivity() {
         stopUnknownActivityService()
         val intent = Intent(requireContext(), SittingActivityService::class.java)
         ContextCompat.startForegroundService(requireContext(), intent)
         isSitting = true
         doingActivity = true
         stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
-        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateButtons(viewModel.isAutoRecognitionActive.value == true)
     }
 
     private fun stopSittingActivity() {
@@ -236,7 +259,7 @@ class HomeFragment : Fragment() {
         doingActivity = false
         stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         startUnknownActivityService()
-        updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
+        updateButtons(viewModel.isAutoRecognitionActive.value == true)
         updateDailyStats()
     }
 
@@ -262,7 +285,9 @@ class HomeFragment : Fragment() {
                 stepsRequestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
             }
         }
-    }private val stepsRequestPermissionLauncher = registerForActivityResult(
+    }
+
+    private val stepsRequestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
@@ -288,6 +313,7 @@ class HomeFragment : Fragment() {
         statsViewmodel.getTotalStepsForDay(currentMillis).observe(viewLifecycleOwner) { steps ->
             steps?.let {
                 viewModel.updateWalkingSteps(it)
+                viewModel.checkDailyGoalReached(it)
             }
         }
         statsViewmodel.getTotalWalkingTimeForDay(currentMillis).observe(viewLifecycleOwner) { mins ->
