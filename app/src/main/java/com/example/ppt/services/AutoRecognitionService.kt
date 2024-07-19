@@ -12,16 +12,15 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.ppt.R
-import com.google.android.gms.location.ActivityRecognition
-import com.google.android.gms.location.ActivityTransition
-import com.google.android.gms.location.ActivityTransitionRequest
-import com.google.android.gms.location.DetectedActivity
+import com.google.android.gms.location.*
 import com.example.ppt.receivers.ActivityTransitionReceiver
+import kotlinx.coroutines.*
 
 class AutoRecognitionService : Service() {
 
     private lateinit var pendingIntent: PendingIntent
     private lateinit var notificationManager: NotificationManager
+    private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
     override fun onCreate() {
         super.onCreate()
@@ -56,86 +55,91 @@ class AutoRecognitionService : Service() {
 
     @SuppressLint("MissingPermission")
     private fun registerActivityTransitions() {
-        val transitions = mutableListOf<ActivityTransition>()
+        serviceScope.launch {
+            val transitions = mutableListOf<ActivityTransition>()
 
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.IN_VEHICLE)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-            .build()
+            transitions += ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.IN_VEHICLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
 
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.IN_VEHICLE)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
-            .build()
+            transitions += ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.IN_VEHICLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build()
 
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.WALKING)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-            .build()
+            transitions += ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.WALKING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
 
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.WALKING)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
-            .build()
+            transitions += ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.WALKING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build()
 
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.RUNNING)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-            .build()
+            transitions += ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.RUNNING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
 
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.RUNNING)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
-            .build()
+            transitions += ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.RUNNING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build()
 
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.STILL)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-            .build()
+            transitions += ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.STILL)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
 
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.STILL)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
-            .build()
+            transitions += ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.STILL)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build()
 
-        val request = ActivityTransitionRequest(transitions)
+            val request = ActivityTransitionRequest(transitions)
 
-        val intent = Intent(this, ActivityTransitionReceiver::class.java).apply {
-            action= "com.example.ppt.ACTION_PROCESS_ACTIVITY_TRANSITIONS"
-        }
-        pendingIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+            val intent = Intent(this@AutoRecognitionService, ActivityTransitionReceiver::class.java).apply {
+                action = "com.example.ppt.ACTION_PROCESS_ACTIVITY_TRANSITIONS"
+            }
+            pendingIntent = PendingIntent.getBroadcast(
+                this@AutoRecognitionService,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            )
 
-        val task = ActivityRecognition.getClient(this)
-            .requestActivityTransitionUpdates(request, pendingIntent)
+            val task = ActivityRecognition.getClient(this@AutoRecognitionService)
+                .requestActivityTransitionUpdates(request, pendingIntent)
 
-        task.addOnSuccessListener {
-            Log.d("AutoRecognitionService", "Successfully registered for activity transitions")
-        }
+            task.addOnSuccessListener {
+                Log.d("AutoRecognitionService", "Successfully registered for activity transitions")
+            }
 
-        task.addOnFailureListener { e: Exception ->
-            Log.e("AutoRecognitionService", "Failed to register for activity transitions", e)
+            task.addOnFailureListener { e: Exception ->
+                Log.e("AutoRecognitionService", "Failed to register for activity transitions", e)
+            }
         }
     }
 
     @SuppressLint("MissingPermission")
     override fun onDestroy() {
         super.onDestroy()
-        val task = ActivityRecognition.getClient(this)
-            .removeActivityTransitionUpdates(pendingIntent)
+        serviceScope.launch {
+            val task = ActivityRecognition.getClient(this@AutoRecognitionService)
+                .removeActivityTransitionUpdates(pendingIntent)
 
-        task.addOnSuccessListener {
-            pendingIntent.cancel()
-            Log.d("AutoRecognitionService", "Successfully removed activity transitions")
-        }
+            task.addOnSuccessListener {
+                pendingIntent.cancel()
+                Log.d("AutoRecognitionService", "Successfully removed activity transitions")
+            }
 
-        task.addOnFailureListener { e: Exception ->
-            Log.e("AutoRecognitionService", "Failed to remove activity transitions", e)
+            task.addOnFailureListener { e: Exception ->
+                Log.e("AutoRecognitionService", "Failed to remove activity transitions", e)
+            }
         }
+        serviceScope.cancel()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

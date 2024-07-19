@@ -16,7 +16,10 @@ class GeofenceHelper(private val context: Context) {
     private val geofencingClient: GeofencingClient = LocationServices.getGeofencingClient(context)
 
     @SuppressLint("MissingPermission")
-    fun addGeofence(geofence: Geofence) {
+    fun addOrUpdateGeofence(geofence: Geofence) {
+
+        removeGeofence(geofence.requestId)
+
         val geofencingRequest = GeofencingRequest.Builder()
             .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
             .addGeofence(geofence)
@@ -27,17 +30,30 @@ class GeofenceHelper(private val context: Context) {
 
         geofencingClient.addGeofences(geofencingRequest, pendingIntent)
             .addOnSuccessListener {
-                Log.d("GeofenceHelper", "Geofence added successfully")
+                Log.d("GeofenceHelper", "Geofence added/updated successfully")
             }
             .addOnFailureListener {
-                Log.e("GeofenceHelper", "Failed to add geofence: ${it.message}")
+                Log.e("GeofenceHelper", "Failed to add/update geofence: ${it.message}")
+            }
+    }
+
+    fun removeGeofence(geofenceId: String) {
+        geofencingClient.removeGeofences(listOf(geofenceId))
+            .addOnSuccessListener {
+                Log.d("GeofenceHelper", "Geofence removed successfully: $geofenceId")
+            }
+            .addOnFailureListener {
+                Log.e("GeofenceHelper", "Failed to remove geofence: ${it.message}")
             }
     }
 
     fun removeGeofences() {
+        val geofencingClient = LocationServices.getGeofencingClient(context)
         val pendingIntent = getGeofencePendingIntent()
+
         geofencingClient.removeGeofences(pendingIntent)
             .addOnSuccessListener {
+                clearGeofencePrefs()
                 Log.d("GeofenceHelper", "Geofences removed successfully")
             }
             .addOnFailureListener {
@@ -47,6 +63,14 @@ class GeofenceHelper(private val context: Context) {
 
     private fun getGeofencePendingIntent(): PendingIntent {
         val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
-        return PendingIntent.getBroadcast(context, 0, intent,PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    private fun clearGeofencePrefs() {
+        val sharedPreferences = context.getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            clear()
+            apply()
+        }
     }
 }
