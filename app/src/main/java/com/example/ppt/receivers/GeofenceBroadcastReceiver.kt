@@ -21,32 +21,35 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         private const val NOTIFICATION_ID = 12345
         private const val PREFS_NAME = "GeofencePrefs"
         private const val KEY_ENTER_TIME = "enter_time"
+        private const val KEY_GEOFENCE_NAME = "GeofenceName"
     }
 
     override fun onReceive(context: Context?, intent: Intent) {
-
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
-
         val geofenceTransition = geofencingEvent?.geofenceTransition
+
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
             geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
+            val sharedPreferences = context?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val geofenceName = sharedPreferences?.getString(KEY_GEOFENCE_NAME, "Unknown Geofence")?.replace("_", " ")
+
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                Log.d("GEOFENCE", "Entered geofence")
+                Log.d("GEOFENCE", "Entered geofence: $geofenceName")
                 val enterTime = System.currentTimeMillis()
-                context?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)?.edit()?.putLong(KEY_ENTER_TIME, enterTime)?.apply()
-                sendNotification(context, "Entered geofence")
+                sharedPreferences?.edit()?.putLong(KEY_ENTER_TIME, enterTime)?.apply()
+                sendNotification(context, "Entered $geofenceName")
             }
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                Log.d("GEOFENCE", "Left geofence")
-                val enterTime = context?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)?.getLong(KEY_ENTER_TIME, -1)
+                Log.d("GEOFENCE", "Left geofence: $geofenceName")
+                val enterTime = sharedPreferences?.getLong(KEY_ENTER_TIME, -1)
                 if (enterTime != null && enterTime != -1L) {
                     val duration = System.currentTimeMillis() - enterTime
                     val durationMinutes = (duration / 1000 / 60).toString()
-                    sendNotification(context, "Left geofence. Duration: $durationMinutes minutes")
+                    sendNotification(context, "Left $geofenceName. Duration: $durationMinutes minutes")
                 } else {
-                    sendNotification(context, "Left geofence")
+                    sendNotification(context, "Left $geofenceName")
                 }
             }
         } else {
@@ -71,7 +74,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.home_icon)
-            .setContentTitle("Geofence Event")
+            .setContentTitle("GeoTracking Event")
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)

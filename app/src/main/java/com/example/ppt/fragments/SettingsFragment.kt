@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,6 +47,7 @@ class SettingsFragment : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var currentLocation: LatLng? = null
     private lateinit var geofenceSwitch: SwitchCompat
+    private lateinit var geofenceName: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,22 +64,13 @@ class SettingsFragment : Fragment() {
         autoRecognitionSwitch = view.findViewById(R.id.AutomaticTracker_switch)
         saveGeofenceButton = view.findViewById(R.id.saveGeoFence_button)
         geofenceSwitch = view.findViewById(R.id.Geofence_switch)
+        geofenceName = view.findViewById(R.id.GeofenceName)
 
         goalInput.minValue = 0
         goalInput.maxValue = 100000
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
-
-        // Check and request location permission if not granted
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            getCurrentLocation()
-        } else {
-            requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
+        getCurrentLocation()
 
         goalViewModel.dailyGoal.observe(viewLifecycleOwner) { goalValue ->
             goalInput.value = goalValue.toInt()
@@ -259,11 +252,20 @@ class SettingsFragment : Fragment() {
 
     private fun saveGeofence() {
         if (currentLocation != null) {
+            val geofenceNameInput = geofenceName.text.toString().trim()
+            if (geofenceNameInput.isEmpty()) {
+                Toast.makeText(
+                    requireContext(),
+                    "Please enter a name for the area of interest",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+
+            val geofenceId = geofenceNameInput.replace(" ", "_")
+
             val geofenceHelper = GeofenceHelper(requireContext())
 
-            geofenceHelper.removeGeofences()
-
-            val geofenceId = UUID.randomUUID().toString()
             val geofence = Geofence.Builder()
                 .setRequestId(geofenceId)
                 .setCircularRegion(currentLocation!!.latitude, currentLocation!!.longitude, 500f)
@@ -273,14 +275,17 @@ class SettingsFragment : Fragment() {
 
             geofenceHelper.addGeofence(geofence)
 
-            val sharedPreferences = requireContext().getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
+            val sharedPreferences =
+                requireContext().getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
             with(sharedPreferences.edit()) {
                 putString("GeofenceLat", currentLocation!!.latitude.toString())
                 putString("GeofenceLng", currentLocation!!.longitude.toString())
+                putString("GeofenceName", geofenceId)
                 apply()
             }
+
             val message =
-                "Geofence saved at: ${currentLocation!!.latitude}, ${currentLocation!!.longitude}"
+                "Geofence saved at: ${currentLocation!!.latitude}, ${currentLocation!!.longitude} with name: $geofenceId"
             Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
         } else {
             Toast.makeText(requireContext(), "Current location not available", Toast.LENGTH_SHORT)
