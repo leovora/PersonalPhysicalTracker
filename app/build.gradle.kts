@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.org.jetbrains.kotlin.kapt)
-    alias(libs.plugins.hilt.gradle.plugin)
 }
 
 android {
@@ -46,10 +45,11 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.lifecycle.service)
-    implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.playServicesLocation)
 
     // Navigation component
     implementation(libs.androidx.navigation.fragment.ktx)
@@ -68,10 +68,6 @@ dependencies {
 
     // easy permissions
     implementation(libs.easypermissions)
-
-    // dagger
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
 
     //MPAndroidChart
     implementation(libs.mpAndroidChart)

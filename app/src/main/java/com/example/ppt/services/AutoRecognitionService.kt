@@ -25,6 +25,7 @@ class AutoRecognitionService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d("AutoRecognitionService", "Service created")
         startForegroundService()
         registerActivityTransitions()
     }
@@ -99,8 +100,15 @@ class AutoRecognitionService : Service() {
 
         val request = ActivityTransitionRequest(transitions)
 
-        val intent = Intent(this, ActivityTransitionReceiver::class.java)
-        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val intent = Intent(this, ActivityTransitionReceiver::class.java).apply {
+            action= "com.example.ppt.ACTION_PROCESS_ACTIVITY_TRANSITIONS"
+        }
+        pendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         val task = ActivityRecognition.getClient(this)
             .requestActivityTransitionUpdates(request, pendingIntent)
@@ -122,6 +130,7 @@ class AutoRecognitionService : Service() {
 
         task.addOnSuccessListener {
             pendingIntent.cancel()
+            Log.d("AutoRecognitionService", "Successfully removed activity transitions")
         }
 
         task.addOnFailureListener { e: Exception ->

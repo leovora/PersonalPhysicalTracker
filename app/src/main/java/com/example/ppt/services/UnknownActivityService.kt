@@ -7,7 +7,6 @@ import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import com.example.ppt.R
 import com.example.ppt.data.Activity
@@ -19,7 +18,7 @@ import kotlinx.coroutines.launch
 class UnknownActivityService : Service() {
 
     private var startTime: Long = 0
-
+    private lateinit var notificationManager: NotificationManager
     private val db by lazy {
         ActivityDatabase.getDatabase(this)
     }
@@ -30,6 +29,8 @@ class UnknownActivityService : Service() {
     }
 
     private fun startForegroundService() {
+        notificationManager = getSystemService(NotificationManager::class.java)
+
         val notificationChannelId = "UNKNOWN_ACTIVITY_CHANNEL"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -40,7 +41,6 @@ class UnknownActivityService : Service() {
             ).apply {
                 description = "Channel for Unknown Activity Service"
             }
-            val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
 

@@ -1,8 +1,6 @@
 [versions]
 agp = "8.5.0"
 composeBom = "2024.06.00"
-hiltAndroid = "2.44"
-hiltAndroidCompiler = "2.44"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -14,16 +12,13 @@ activity = "1.9.0"
 constraintlayout = "2.1.4"
 navigationUiKtx = "2.7.7"
 roomKtx = "2.6.1"
-material3Android = "1.2.1"
-com-android-application = "8.5.0"
 org-jetbrains-kotlin-android = "1.8.0"
-org-jetbrains-kotlin-kapt = "1.8.0"
 lifecycleService = "2.8.3"
 hilt = "2.44"
 mpAndroidChart = "3.1.0"
 playServicesLocation = "21.3.0"
 progress-bar = "3.1.0"
-uiDesktop = "1.6.8"
+playServicesMaps = "19.0.0"
 
 
 [libraries]
@@ -37,8 +32,6 @@ androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx",
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomKtx" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomKtx" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -49,9 +42,9 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 easypermissions = { group = "pub.devrel", name = "easypermissions", version = "3.0.0" }
 androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycleService" }
 mpAndroidChart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpAndroidChart" }
-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+playServicesLocation = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 progressbar = {group = "com.mikhaellopez", name = "circularprogressbar", version.ref = "progress-bar"}
-androidx-ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 
 
 [plugins]
