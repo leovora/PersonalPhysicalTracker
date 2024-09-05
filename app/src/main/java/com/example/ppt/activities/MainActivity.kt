@@ -14,7 +14,12 @@ import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
 import com.example.ppt.R
 import com.example.ppt.receivers.NotificationBroadcastReceiver
+import com.example.ppt.services.AutoRecognitionService
+import com.example.ppt.services.CurrentLocationService
+import com.example.ppt.services.DrivingActivityService
+import com.example.ppt.services.SittingActivityService
 import com.example.ppt.services.UnknownActivityService
+import com.example.ppt.services.WalkingActivityService
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -49,23 +54,30 @@ class MainActivity : AppCompatActivity() {
         startReminderAlarm()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        stopReminderAlarm()
-    }
-
     private fun startReminderAlarm() {
         val intent = Intent(this, NotificationBroadcastReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
         val alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val interval = AlarmManager.INTERVAL_HALF_DAY
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pendingIntent)
     }
 
-    private fun stopReminderAlarm() {
-        val intent = Intent(this, NotificationBroadcastReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.cancel(pendingIntent)
+    private fun stopServices() {
+        stopService(WalkingActivityService::class.java)
+        stopService(DrivingActivityService::class.java)
+        stopService(SittingActivityService::class.java)
+        stopService(UnknownActivityService::class.java)
+        stopService(AutoRecognitionService::class.java)
+        stopService(CurrentLocationService::class.java)
+    }
+
+    private fun stopService(serviceClass: Class<*>) {
+        val intent = Intent(this, serviceClass)
+        this.stopService(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopServices()
     }
 }

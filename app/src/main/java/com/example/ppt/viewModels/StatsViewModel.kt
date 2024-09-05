@@ -18,10 +18,6 @@ class StatsViewModel(private val repository: ActivityRepository): ViewModel() {
         return repository.getFilteredActivities(date, type, duration)
     }
 
-    fun getActivitiesByType(type: String): LiveData<List<Activity>> {
-        return repository.getActivitiesByType(type)
-    }
-
     fun getActivitiesByMonth(): LiveData<List<Activity>>{
         return repository.getActivitiesByMonth()
     }
@@ -44,13 +40,6 @@ class StatsViewModel(private val repository: ActivityRepository): ViewModel() {
 
     fun getTotalSittingTimeForDay(dateInMillis: Long): LiveData<Int> {
         return repository.getTotalSittingTimeForDay(dateInMillis)
-    }
-
-    //insert with coroutine
-    fun insertActivity(activity: Activity) {
-        viewModelScope.launch {
-            repository.insertActivity(activity)
-        }
     }
 
     fun setDate(date: Long) {
