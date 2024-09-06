@@ -53,12 +53,15 @@ class SettingsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Inflata il layout per il frammento
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
 
+        // Inizializza il ViewModel per la gestione degli obiettivi
         val application = requireActivity().application
         val factory = ActivityViewModelFactory(application)
         goalViewModel = ViewModelProvider(this, factory)[GoalViewModel::class.java]
 
+        // Inizializza i componenti dell'interfaccia utente
         goalInput = view.findViewById(R.id.dailyGoal_NumberPicker)
         saveButton = view.findViewById(R.id.saveDailyGoal_button)
         autoRecognitionSwitch = view.findViewById(R.id.AutomaticTracker_switch)
@@ -66,16 +69,20 @@ class SettingsFragment : Fragment() {
         geofenceSwitch = view.findViewById(R.id.Geofence_switch)
         geofenceName = view.findViewById(R.id.GeofenceName)
 
+        // Imposta i valori minimi e massimi per il NumberPicker
         goalInput.minValue = 0
         goalInput.maxValue = 100000
 
+        // Client per la localizzazione
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         getCurrentLocation()
 
+        // Osserva il cambiamento dell'obiettivo giornaliero e aggiorna l'interfaccia
         goalViewModel.dailyGoal.observe(viewLifecycleOwner) { goalValue ->
             goalInput.value = goalValue.toInt()
         }
 
+        // Imposta il listener per il pulsante di salvataggio dell'obiettivo giornaliero
         saveButton.setOnClickListener {
             val newGoal = goalInput.value
             goalViewModel.updateDailyGoal(newGoal.toFloat())
@@ -87,10 +94,12 @@ class SettingsFragment : Fragment() {
             ).show()
         }
 
+        // Imposta il listener per il pulsante di salvataggio del geofence
         saveGeofenceButton.setOnClickListener {
             saveGeofence()
         }
 
+        // Imposta il listener per il cambiamento dello stato dello switch di auto-riconoscimento
         autoRecognitionSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 checkLocationPermission()
@@ -100,6 +109,7 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        // Imposta il listener per il cambiamento dello stato dello switch del geofence
         geofenceSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 startGeofenceNotificationService()
@@ -108,6 +118,7 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        // Recupera e visualizza il geofence salvato se esiste
         val sharedPreferences =
             requireContext().getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
         val geofenceLat = sharedPreferences.getString("GeofenceLat", null)
@@ -115,22 +126,26 @@ class SettingsFragment : Fragment() {
         if (geofenceLat != null && geofenceLng != null) {
             Log.d("SettingsFragment", "Saved geofence at: $geofenceLat, $geofenceLng")
         }
+
         checkBackgroundLocationPermission()
         return view
     }
 
+    // Avvia il servizio di notifica geofence
     private fun startGeofenceNotificationService() {
         val intent = Intent(requireContext(), CurrentLocationService::class.java)
         requireContext().startService(intent)
         Log.d("SettingsFragment", "GeofenceNotificationService started")
     }
 
+    // Arresta il servizio di notifica geofence
     private fun stopGeofenceNotificationService() {
         val intent = Intent(requireContext(), CurrentLocationService::class.java)
         requireContext().stopService(intent)
         Log.d("SettingsFragment", "GeofenceNotificationService stopped")
     }
 
+    // Ottiene la posizione corrente del dispositivo
     private fun getCurrentLocation() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -150,10 +165,12 @@ class SettingsFragment : Fragment() {
                     Log.e("SettingsFragment", "Error getting last location", e)
                 }
         } else {
+            // Richiede il permesso di localizzazione se non già concesso
             requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
+    // Launcher per la richiesta del permesso di localizzazione
     private val requestLocationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
@@ -164,6 +181,7 @@ class SettingsFragment : Fragment() {
             }
         }
 
+    // Controlla il permesso di riconoscimento delle attività e avvia il servizio di auto-riconoscimento
     private fun checkActivityPermissionAndStartAutoRecognition() {
         when {
             ContextCompat.checkSelfPermission(
@@ -179,6 +197,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    // Controlla il permesso di localizzazione
     private fun checkLocationPermission() {
         when {
             ContextCompat.checkSelfPermission(
@@ -194,6 +213,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    // Controlla il permesso di localizzazione in background
     private fun checkBackgroundLocationPermission() {
         when {
             ContextCompat.checkSelfPermission(
@@ -209,6 +229,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    // Avvia il servizio di auto-riconoscimento
     private fun startAutoRecognitionService() {
         stopServices()
         sharedViewModel.resetActivities()
@@ -218,6 +239,7 @@ class SettingsFragment : Fragment() {
         requireContext().startService(intent)
     }
 
+    // Arresta il servizio di auto-riconoscimento e avvia il servizio per attività sconosciute
     private fun stopAutoRecognitionService() {
         val intent = Intent(requireContext(), AutoRecognitionService::class.java)
         requireContext().stopService(intent)
@@ -226,6 +248,7 @@ class SettingsFragment : Fragment() {
         requireContext().startService(intentUnknownActivity)
     }
 
+    // Launcher per la richiesta del permesso di riconoscimento delle attività
     private val stepsRequestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -238,6 +261,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    // Arresta tutti i servizi di riconoscimento attività
     private fun stopServices() {
         stopService(WalkingActivityService::class.java)
         stopService(DrivingActivityService::class.java)
@@ -245,11 +269,13 @@ class SettingsFragment : Fragment() {
         stopService(UnknownActivityService::class.java)
     }
 
+    // Arresta un servizio specificato dalla classe
     private fun stopService(serviceClass: Class<*>) {
         val intent = Intent(requireContext(), serviceClass)
         requireContext().stopService(intent)
     }
 
+    // Salva un geofence basato sulla posizione corrente e sul nome fornito
     private fun saveGeofence() {
         if (currentLocation != null) {
             val geofenceNameInput = geofenceName.text.toString().trim()

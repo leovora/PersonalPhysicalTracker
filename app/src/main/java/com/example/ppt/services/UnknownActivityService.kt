@@ -15,19 +15,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * Servizio per monitorare e gestire i periodi tra un'attività e l'altra
+ */
+
 class UnknownActivityService : Service() {
 
     private var startTime: Long = 0
     private lateinit var notificationManager: NotificationManager
+
+    // Lazy initialization del database delle attività
     private val db by lazy {
         ActivityDatabase.getDatabase(this)
     }
 
     override fun onCreate() {
         super.onCreate()
-        startForegroundService()
+        startForegroundService() // Avvia il servizio in foreground
     }
 
+    // Configura il canale di notifica e avvia il servizio in foreground
     private fun startForegroundService() {
         notificationManager = getSystemService(NotificationManager::class.java)
 
@@ -52,16 +59,18 @@ class UnknownActivityService : Service() {
         startForeground(1, notification)
     }
 
+    // Viene chiamato quando il servizio viene avviato
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startTime = System.currentTimeMillis()
-        return START_STICKY
+        return START_STICKY // Indica che il servizio deve essere riavviato se viene interrotto
     }
 
     override fun onDestroy() {
-        saveActivityToDatabase()
+        saveActivityToDatabase() // Salva l'attività nel database quando il servizio viene distrutto
         super.onDestroy()
     }
 
+    // Salva l'attività nel database
     private fun saveActivityToDatabase() {
         val activity = Activity(
             type = "Unknown",
@@ -69,6 +78,7 @@ class UnknownActivityService : Service() {
             endTimeMillis = System.currentTimeMillis()
         )
 
+        // Utilizza CoroutineScope per eseguire l'inserimento nel database in background
         CoroutineScope(Dispatchers.IO).launch {
             db.getDao().insert(activity)
         }

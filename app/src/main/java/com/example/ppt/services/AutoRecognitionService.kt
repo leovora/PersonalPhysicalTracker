@@ -16,19 +16,24 @@ import com.google.android.gms.location.*
 import com.example.ppt.receivers.ActivityTransitionReceiver
 import kotlinx.coroutines.*
 
+/**
+ * Servizio per il riconoscimento automatico delle transizioni di attività
+ */
+
 class AutoRecognitionService : Service() {
 
-    private lateinit var pendingIntent: PendingIntent
-    private lateinit var notificationManager: NotificationManager
-    private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
+    private lateinit var pendingIntent: PendingIntent // Intent per gestire le transizioni di attività
+    private lateinit var notificationManager: NotificationManager // Manager per le notifiche
+    private val serviceScope = CoroutineScope(Dispatchers.IO + Job()) // CoroutineScope per operazioni in background
 
     override fun onCreate() {
         super.onCreate()
         Log.d("AutoRecognitionService", "Service created")
-        startForegroundService()
-        registerActivityTransitions()
+        startForegroundService() // Avvia il servizio in foreground
+        registerActivityTransitions() // Registra le transizioni di attività
     }
 
+    // Configura e avvia il servizio in foreground con una notifica
     private fun startForegroundService() {
         notificationManager = getSystemService(NotificationManager::class.java)
 
@@ -58,6 +63,7 @@ class AutoRecognitionService : Service() {
         serviceScope.launch {
             val transitions = mutableListOf<ActivityTransition>()
 
+            // Aggiunge le transizioni di attività da monitorare
             transitions += ActivityTransition.Builder()
                 .setActivityType(DetectedActivity.IN_VEHICLE)
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
@@ -98,8 +104,9 @@ class AutoRecognitionService : Service() {
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
                 .build()
 
-            val request = ActivityTransitionRequest(transitions)
+            val request = ActivityTransitionRequest(transitions) // Richiesta per le transizioni di attività
 
+            // Crea un Intent per ricevere le notifiche delle transizioni di attività
             val intent = Intent(this@AutoRecognitionService, ActivityTransitionReceiver::class.java).apply {
                 action = "com.example.ppt.ACTION_PROCESS_ACTIVITY_TRANSITIONS"
             }
@@ -110,6 +117,7 @@ class AutoRecognitionService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
 
+            // Richiede aggiornamenti delle transizioni di attività
             val task = ActivityRecognition.getClient(this@AutoRecognitionService)
                 .requestActivityTransitionUpdates(request, pendingIntent)
 
@@ -127,6 +135,7 @@ class AutoRecognitionService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.launch {
+            // Rimuove gli aggiornamenti delle transizioni di attività
             val task = ActivityRecognition.getClient(this@AutoRecognitionService)
                 .removeActivityTransitionUpdates(pendingIntent)
 

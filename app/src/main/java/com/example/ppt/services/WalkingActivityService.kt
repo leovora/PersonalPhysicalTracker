@@ -16,36 +16,45 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.ppt.R
-import com.example.ppt.data.ActivityDatabase
 import com.example.ppt.data.Activity
+import com.example.ppt.data.ActivityDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+/**
+ * Servizio per monitorare e gestire le attività di camminata
+ */
 
 class WalkingActivityService : Service(), SensorEventListener {
 
     private var startTime: Long = 0
     private var stepsAtStart = 0
     private var stepsSinceStart = 0
-    private val stepsLengthInMeters = 0.762f
+    private val stepsLengthInMeters = 0.762f // Lunghezza del passo in metri
 
+    // Lazy initialization del database delle attività
     private val db by lazy {
         ActivityDatabase.getDatabase(this)
     }
 
+    // Lazy initialization del sensor manager
     private val sensorManager by lazy {
         getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
+
+    // Lazy initialization del sensore di conteggio dei passi
     private val stepCounterSensor: Sensor? by lazy {
         sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
     }
 
     override fun onCreate() {
         super.onCreate()
-        startForegroundService()
-        registerStepCounterSensor()
+        startForegroundService() // Avvia il servizio in foreground
+        registerStepCounterSensor() // Registra il listener per il sensore di conteggio dei passi
     }
 
+    // Configura il canale di notifica e avvia il servizio in foreground
     private fun startForegroundService() {
         val notificationChannelId = "WALKING_ACTIVITY_CHANNEL"
 
@@ -70,29 +79,31 @@ class WalkingActivityService : Service(), SensorEventListener {
         startForeground(1, notification)
     }
 
+    // Registra il listener per il sensore di conteggio dei passi
     private fun registerStepCounterSensor() {
         stepCounterSensor?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         } ?: run {
             Log.e("WalkingActivityService", "Step counter sensor is not present on this device")
-            startTime = System.currentTimeMillis()
+            startTime = System.currentTimeMillis() // Se il sensore non è presente, inizializza startTime
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startTime = System.currentTimeMillis()
-        return START_STICKY
+        return START_STICKY // Indica che il servizio deve essere riavviato se viene interrotto
     }
 
+    // Gestisce gli eventi del sensore
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (it.sensor.type == Sensor.TYPE_STEP_COUNTER) {
                 if (stepsAtStart == 0) {
-                    stepsAtStart = it.values[0].toInt()
+                    stepsAtStart = it.values[0].toInt() // Imposta i passi iniziali al primo valore del sensore
                 }
-                stepsSinceStart = it.values[0].toInt() - stepsAtStart
+                stepsSinceStart = it.values[0].toInt() - stepsAtStart // Calcola i passi dall'inizio
 
-                val elapsedTime = System.currentTimeMillis() - startTime
+                val elapsedTime = System.currentTimeMillis() - startTime // Tempo trascorso
 
                 Log.d("WalkingActivityService", "Tempo trascorso: $elapsedTime ms, Passi: $stepsSinceStart")
             }
@@ -100,15 +111,16 @@ class WalkingActivityService : Service(), SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // Do nothing
+        // Non fare nulla
     }
 
     override fun onDestroy() {
-        saveActivityToDatabase()
-        sensorManager.unregisterListener(this)
+        saveActivityToDatabase() // Salva l'attività nel database quando il servizio viene distrutto
+        sensorManager.unregisterListener(this) // Disiscrive il listener dal sensore
         super.onDestroy()
     }
 
+    // Salva l'attività di camminata nel database
     private fun saveActivityToDatabase() {
         val activity = Activity(
             type = "Walking",
@@ -118,6 +130,7 @@ class WalkingActivityService : Service(), SensorEventListener {
             kilometers = stepsSinceStart * stepsLengthInMeters / 1000
         )
 
+        // Utilizza CoroutineScope per eseguire l'inserimento nel database in background
         CoroutineScope(Dispatchers.IO).launch {
             db.getDao().insert(activity)
         }

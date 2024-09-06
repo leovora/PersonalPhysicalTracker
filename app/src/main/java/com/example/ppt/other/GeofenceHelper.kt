@@ -11,10 +11,16 @@ import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 
+/**
+ * Classe helper per la gestione dei geofences
+ */
+
 class GeofenceHelper(private val context: Context) {
 
+    // Client per la gestione dei geofences
     private val geofencingClient: GeofencingClient = LocationServices.getGeofencingClient(context)
 
+    // Metodo per aggiungere un geofence
     @SuppressLint("MissingPermission")
     fun addGeofence(geofence: Geofence) {
         val geofencingRequest = GeofencingRequest.Builder()
@@ -22,9 +28,11 @@ class GeofenceHelper(private val context: Context) {
             .addGeofence(geofence)
             .build()
 
+        // Crea un Intent per il GeofenceBroadcastReceiver
         val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
+        // Aggiunge il geofence tramite il GeofencingClient
         geofencingClient.addGeofences(geofencingRequest, pendingIntent)
             .addOnSuccessListener {
                 Log.d("GeofenceHelper", "Geofence added successfully")
@@ -32,21 +40,5 @@ class GeofenceHelper(private val context: Context) {
             .addOnFailureListener {
                 Log.e("GeofenceHelper", "Failed to add geofence: ${it.message}")
             }
-    }
-
-    fun removeGeofences() {
-        val pendingIntent = getGeofencePendingIntent()
-        geofencingClient.removeGeofences(pendingIntent)
-            .addOnSuccessListener {
-                Log.d("GeofenceHelper", "Geofences removed successfully")
-            }
-            .addOnFailureListener {
-                Log.e("GeofenceHelper", "Failed to remove geofences: ${it.message}")
-            }
-    }
-
-    private fun getGeofencePendingIntent(): PendingIntent {
-        val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
-        return PendingIntent.getBroadcast(context, 0, intent,PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 }

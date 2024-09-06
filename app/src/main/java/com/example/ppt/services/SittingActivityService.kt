@@ -19,27 +19,37 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * Servizio per monitorare e gestire le attività di seduta
+ */
+
 class SittingActivityService : Service() {
 
     private var startTime: Long = 0
     private lateinit var notificationManager: NotificationManager
+
+    //handler e runnable che servono per mandare una notifica posticipata
     private lateinit var handler: Handler
     private lateinit var notificationRunnable: Runnable
 
+    // Lazy initialization del database delle attività
     private val db by lazy {
         ActivityDatabase.getDatabase(this)
     }
 
     override fun onCreate() {
         super.onCreate()
-        startForegroundService()
+        startForegroundService() // Avvia il servizio in foreground
         handler = Handler(Looper.getMainLooper())
+        // Crea un Runnable per inviare una notifica
         notificationRunnable = Runnable {
             sendNotification()
         }
-        handler.postDelayed(notificationRunnable, 2400000) //40 * 60 * 1000    40 minutes delay
+        // Posticipa l'esecuzione del Runnable di 30 minuti
+        handler.postDelayed(notificationRunnable, 30 * 60 * 1000)
     }
 
+    /// Configura il servizio per essere in esecuzione in foreground
     private fun startForegroundService() {
         notificationManager = getSystemService(NotificationManager::class.java)
 
@@ -64,17 +74,19 @@ class SittingActivityService : Service() {
         startForeground(1, notification)
     }
 
+    // Viene chiamato quando il servizio viene avviato
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startTime = System.currentTimeMillis()
-        return START_STICKY
+        return START_STICKY // Indica che il servizio deve essere riavviato se viene interrotto
     }
 
     override fun onDestroy() {
-        handler.removeCallbacks(notificationRunnable)
+        handler.removeCallbacks(notificationRunnable) // Rimuove il Runnable per evitare chiamate future
         saveActivityToDatabase()
         super.onDestroy()
     }
 
+    // Salva l'attività nel database
     private fun saveActivityToDatabase() {
         val activity = Activity(
             type = "Sitting",
@@ -82,18 +94,20 @@ class SittingActivityService : Service() {
             endTimeMillis = System.currentTimeMillis()
         )
 
+        // Utilizza CoroutineScope per eseguire l'inserimento nel database in background
         CoroutineScope(Dispatchers.IO).launch {
             db.getDao().insert(activity)
         }
     }
 
+    // Invia una notifica per ricordare all'utente di muoversi
     private fun sendNotification() {
         val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
 
         val notification: Notification = NotificationCompat.Builder(this, "SITTING_ACTIVITY_CHANNEL")
             .setContentTitle("Time to Move!")
-            .setContentText("You've been sitting for 40 minutes. Stand up and take a walk!")
+            .setContentText("You've been sitting for 30 minutes. Stand up and take a walk!")
             .setSmallIcon(R.drawable.notification_icn)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

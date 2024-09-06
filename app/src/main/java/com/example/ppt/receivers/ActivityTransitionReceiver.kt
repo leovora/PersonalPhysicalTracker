@@ -11,17 +11,26 @@ import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
 
+/**
+ * Receiver per gestire i cambiamenti di attività
+ */
+
 class ActivityTransitionReceiver : BroadcastReceiver() {
 
+    // Metodo chiamato quando il broadcast viene ricevuto
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("ActivityTransitionReceiver", "onReceive called")
 
+        // Controlla se l'intent contiene un risultato di transizione dell'attività
         if (ActivityTransitionResult.hasResult(intent)) {
             Log.d("ActivityTransitionReceiver", "ActivityTransitionResult has result")
 
+            // Estrae il risultato dell'attività dall'intent
             val result = ActivityTransitionResult.extractResult(intent)!!
+            // Itera attraverso gli eventi di transizione dell'attività
             for (event in result.transitionEvents) {
                 Log.d("ActivityTransitionReceiver", "Activity transition: ${event.activityType} ${event.transitionType}")
+                // Gestisce ciascun tipo di attività
                 when (event.activityType) {
                     DetectedActivity.IN_VEHICLE -> handleInVehicleTransition(context, event.transitionType)
                     DetectedActivity.WALKING -> handleWalkingTransition(context, event.transitionType)
@@ -34,6 +43,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         }
     }
 
+    // Gestisce la transizione dell'attività quando si guida
     private fun handleInVehicleTransition(context: Context, transitionType: Int) {
         if (transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
             context.startService(Intent(context, DrivingActivityService::class.java))
@@ -44,6 +54,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         }
     }
 
+    // Gestisce la transizione dell'attività quando si cammina
     private fun handleWalkingTransition(context: Context, transitionType: Int) {
         if (transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
             context.startService(Intent(context, WalkingActivityService::class.java))
@@ -54,6 +65,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         }
     }
 
+    // Gestisce la transizione dell'attività quando si corre
     private fun handleRunningTransition(context: Context, transitionType: Int) {
         if (transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
             context.startService(Intent(context, WalkingActivityService::class.java))
@@ -64,6 +76,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         }
     }
 
+    // Gestisce la transizione dell'attività quando si è seduti
     private fun handleStillTransition(context: Context, transitionType: Int) {
         if (transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
             context.startService(Intent(context, SittingActivityService::class.java))

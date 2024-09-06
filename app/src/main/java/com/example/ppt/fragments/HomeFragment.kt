@@ -31,9 +31,12 @@ import com.example.ppt.viewModels.GoalViewModel
 import com.example.ppt.viewModels.SharedViewModel
 import com.example.ppt.viewModels.StatsViewModel
 
+/**
+ * Fragment per la gestione delle attività quotidiane (camminata, guida, sedentarietà).
+ */
 class HomeFragment : Fragment() {
 
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels() // ViewModel condiviso per gestire lo stato delle attività
 
     private lateinit var database: ActivityDatabase
     private lateinit var repository: ActivityRepository
@@ -60,6 +63,9 @@ class HomeFragment : Fragment() {
     private var isDriving = false
     private var isSitting = false
 
+    /**
+     * Configura il database, il repository e i ViewModel quando il fragment è attaccato al contesto.
+     */
     override fun onAttach(context: android.content.Context) {
         super.onAttach(context)
         database = ActivityDatabase.getDatabase(requireContext())
@@ -72,6 +78,9 @@ class HomeFragment : Fragment() {
         goalViewModel = ViewModelProvider(this, factory)[GoalViewModel::class.java]
     }
 
+    /**
+     * Inizializza la vista e i listener per i pulsanti e aggiorna i dati delle attività.
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -92,6 +101,7 @@ class HomeFragment : Fragment() {
         messageTitle = view.findViewById(R.id.message_title)
         messageDescription = view.findViewById(R.id.message_description)
 
+        // Impostazione dei listener per i pulsanti
         startWalkingButton.setOnClickListener {
             if (!doingActivity) {
                 checkActivityPermissionAndStartWalkingActivity()
@@ -134,6 +144,7 @@ class HomeFragment : Fragment() {
             }
         }
 
+        // Observer per aggiornare la UI basata sullo stato delle attività
         sharedViewModel.isWalking.observe(viewLifecycleOwner) { isWalking ->
             stopWalkingButton.setTextColor(
                 ContextCompat.getColor(
@@ -161,6 +172,7 @@ class HomeFragment : Fragment() {
             )
         }
 
+        // Aggiornamento delle statistiche giornaliere
         statsViewmodel.getTotalStepsForDay(System.currentTimeMillis()).observe(viewLifecycleOwner) { steps ->
             steps?.let {
                 sharedViewModel.updateWalkingSteps(it)
@@ -168,6 +180,7 @@ class HomeFragment : Fragment() {
             }
         }
 
+        // Observer per lo stato delle attività e aggiornamento dei pulsanti
         sharedViewModel.isDoingActivity.observe(viewLifecycleOwner) { isDoingActivity ->
             doingActivity = isDoingActivity
             updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
@@ -177,6 +190,7 @@ class HomeFragment : Fragment() {
             updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
         }
 
+        // Aggiornamento dei testi delle statistiche
         sharedViewModel.walkingSteps.observe(viewLifecycleOwner) { steps ->
             walkingStepsText.text = steps.toString()
             goalViewModel.checkDailyGoalReached(steps)
@@ -194,10 +208,12 @@ class HomeFragment : Fragment() {
             sittingMinsText.text = (mins / 60000).toString()
         }
 
+        // Impostazione del listener per il pulsante di visualizzazione degli obiettivi giornalieri
         progressBarCard.setOnClickListener {
             startActivity(Intent(requireContext(), DailyGoalActivity::class.java))
         }
 
+        // Messaggio per il raggiungimento dell'obiettivo giornaliero
         sharedViewModel.isDailyGoalReached.observe(viewLifecycleOwner) { isReached ->
             if (isReached) {
                 messageTitle.text = "You\'re doing great!"
@@ -208,11 +224,15 @@ class HomeFragment : Fragment() {
             }
         }
 
+        // Inizializzazione dello stato dei pulsanti e delle statistiche
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
         updateDailyStats()
         return view
     }
 
+    /**
+     * Avvia l'attività di camminata controllando prima i permessi necessari.
+     */
     private fun startWalkingActivity() {
         stopUnknownActivityService()
         val intent = Intent(requireContext(), WalkingActivityService::class.java)
@@ -220,21 +240,29 @@ class HomeFragment : Fragment() {
         isWalking = true
         doingActivity = true
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+        sharedViewModel.startDoingActivity()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
+    /**
+     * Ferma l'attività di camminata e riavvia il servizio per attività sconosciute.
+     */
     private fun stopWalkingActivity() {
         val intent = Intent(requireContext(), WalkingActivityService::class.java)
         requireContext().stopService(intent)
         isWalking = false
         doingActivity = false
         stopWalkingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        sharedViewModel.stopDoingActivity()
 
         startUnknownActivityService()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
         updateDailyStats()
     }
 
+    /**
+     * Avvia l'attività di guida e ferma il servizio per attività sconosciute.
+     */
     private fun startDrivingActivity() {
         stopUnknownActivityService()
         val intent = Intent(requireContext(), DrivingActivityService::class.java)
@@ -242,20 +270,28 @@ class HomeFragment : Fragment() {
         isDriving = true
         doingActivity = true
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+        sharedViewModel.startDoingActivity()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
+    /**
+     * Ferma l'attività di guida e riavvia il servizio per attività sconosciute.
+     */
     private fun stopDrivingActivity() {
         val intent = Intent(requireContext(), DrivingActivityService::class.java)
         requireContext().stopService(intent)
         isDriving = false
         doingActivity = false
         stopDrivingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        sharedViewModel.stopDoingActivity()
         startUnknownActivityService()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
         updateDailyStats()
     }
 
+    /**
+     * Avvia l'attività di seduta e ferma il servizio per attività sconosciute.
+     */
     private fun startSittingActivity() {
         stopUnknownActivityService()
         val intent = Intent(requireContext(), SittingActivityService::class.java)
@@ -263,20 +299,28 @@ class HomeFragment : Fragment() {
         isSitting = true
         doingActivity = true
         stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+        sharedViewModel.startDoingActivity()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
     }
 
+    /**
+     * Ferma l'attività di seduta e riavvia il servizio per attività sconosciute.
+     */
     private fun stopSittingActivity() {
         val intent = Intent(requireContext(), SittingActivityService::class.java)
         requireContext().stopService(intent)
         isSitting = false
         doingActivity = false
         stopSittingButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+        sharedViewModel.stopDoingActivity()
         startUnknownActivityService()
         updateButtons(sharedViewModel.isAutoRecognitionActive.value == true)
         updateDailyStats()
     }
 
+    /**
+     * Abilita o disabilita i pulsanti a seconda dello stato dell'attività e del riconoscimento automatico.
+     */
     private fun updateButtons(autoRecognitionActive: Boolean) {
         startDrivingButton.isEnabled = !autoRecognitionActive && !doingActivity
         startWalkingButton.isEnabled = !autoRecognitionActive && !doingActivity
@@ -287,6 +331,9 @@ class HomeFragment : Fragment() {
         stopSittingButton.isEnabled = !autoRecognitionActive && isSitting
     }
 
+    /**
+     * Controlla i permessi per l'attività e avvia l'attività di camminata se i permessi sono concessi.
+     */
     private fun checkActivityPermissionAndStartWalkingActivity() {
         when {
             ContextCompat.checkSelfPermission(
@@ -301,6 +348,9 @@ class HomeFragment : Fragment() {
         }
     }
 
+    /**
+     * Launcher per richiedere il permesso di conteggio dei passi
+     */
     private val stepsRequestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -312,16 +362,25 @@ class HomeFragment : Fragment() {
         }
     }
 
+    /**
+     * Ferma il servizio per le attività sconosciute.
+     */
     private fun stopUnknownActivityService() {
         val intent = Intent(requireContext(), UnknownActivityService::class.java)
         requireContext().stopService(intent)
     }
 
+    /**
+     * Avvia il servizio per le attività sconosciute.
+     */
     private fun startUnknownActivityService() {
         val intent = Intent(requireContext(), UnknownActivityService::class.java)
         ContextCompat.startForegroundService(requireContext(), intent)
     }
 
+    /**
+     * Aggiorna le statistiche giornaliere e il ViewModel con i dati delle attività.
+     */
     private fun updateDailyStats() {
         val currentMillis = System.currentTimeMillis()
         statsViewmodel.getTotalStepsForDay(currentMillis).observe(viewLifecycleOwner) { steps ->

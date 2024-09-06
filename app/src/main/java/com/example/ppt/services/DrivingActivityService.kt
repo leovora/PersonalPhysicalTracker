@@ -20,30 +20,36 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * Servizio per monitorare e gestire le attività di guida
+ */
 
-class DrivingActivityService : Service(){
+class DrivingActivityService : Service() {
 
     private var startTime: Long = 0
     private lateinit var notificationManager: NotificationManager
+
+    //handler e runnable che servono per mandare una notifica posticipata
     private lateinit var handler: Handler
     private lateinit var notificationRunnable: Runnable
 
-
+    // Lazy initialization del database delle attività
     private val db by lazy {
         ActivityDatabase.getDatabase(this)
     }
 
     override fun onCreate() {
         super.onCreate()
-        startForegroundService()
-        handler = Handler(Looper.getMainLooper())
-        notificationManager = getSystemService(NotificationManager::class.java)
+        startForegroundService() // Avvia il servizio come foreground service
+        handler = Handler(Looper.getMainLooper()) // Inizializza il handler
+        notificationManager = getSystemService(NotificationManager::class.java) // Inizializza il NotificationManager
         notificationRunnable = Runnable {
             sendNotification()
         }
-        handler.postDelayed(notificationRunnable, 60 * 60 * 1000 ) // 60 minutes delay
+        handler.postDelayed(notificationRunnable, 60 * 60 * 1000) // 60 minuti di ritardo
     }
 
+    // Configura il servizio per essere in esecuzione in foreground
     private fun startForegroundService() {
         val notificationChannelId = "DRIVING_ACTIVITY_CHANNEL"
 
@@ -67,32 +73,37 @@ class DrivingActivityService : Service(){
         startForeground(1, notification)
     }
 
+    // Viene chiamato quando il servizio viene avviato
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startTime = System.currentTimeMillis()
-        return START_STICKY
+        return START_STICKY // Indica che il servizio deve essere riavviato se viene interrotto
     }
 
+    // Viene chiamato quando il servizio viene distrutto
     override fun onDestroy() {
-        saveActivityToDatabase()
+        saveActivityToDatabase() // Salva l'attività nel database
         super.onDestroy()
     }
 
+    // Salva i dati dell'attività nel database
     private fun saveActivityToDatabase() {
         val activity = Activity(
             type = "Driving",
             startTimeMillis = startTime,
-            endTimeMillis = System.currentTimeMillis()
+            endTimeMillis = System.currentTimeMillis() // Memorizza il tempo di fine dell'attività
         )
 
+        // Utilizza CoroutineScope per eseguire l'inserimento nel database in background
         CoroutineScope(Dispatchers.IO).launch {
             db.getDao().insert(activity)
         }
     }
 
+    // Invia una notifica dopo un'ora guida
     private fun sendNotification() {
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
 
         val notification: Notification = NotificationCompat.Builder(this, "DRIVING_ACTIVITY_CHANNEL")
             .setContentTitle("Time to Move!")
@@ -102,11 +113,10 @@ class DrivingActivityService : Service(){
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(2, notification)
+        notificationManager.notify(2, notification) // Mostra la notifica
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-
 }

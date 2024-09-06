@@ -41,13 +41,13 @@ class StatsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Inflata il layout per il frammento
         val view = inflater.inflate(R.layout.fragment_stats, container, false)
 
-        // CHARTS
         lineChartCard = view.findViewById(R.id.LineChart_card)
         pieChartCard = view.findViewById(R.id.PieChart_card)
 
-        // Click listeners for cards
+        // Imposta i listener sulle card view
         lineChartCard.setOnClickListener {
             startActivity(Intent(requireContext(), LineChartActivity::class.java))
         }
@@ -56,13 +56,11 @@ class StatsFragment : Fragment() {
             startActivity(Intent(requireContext(), PieChartActivity::class.java))
         }
 
-        // CALENDARVIEW
         calendarView = view.findViewById(R.id.calendar)
-
-        // FILTER
         typeFilter = view.findViewById(R.id.filter_spinner)
         durationFilter = view.findViewById(R.id.DurationFilter_input)
 
+        // Crea e imposta l'adapter per lo spinner del filtro del tipo di di attività
         ArrayAdapter.createFromResource(
             requireContext(),
             R.array.activity_types,
@@ -72,26 +70,26 @@ class StatsFragment : Fragment() {
             typeFilter.adapter = adapter
         }
 
-        // RECYCLERVIEW
+        // Inizializza il RecyclerView per visualizzare le attività
         recyclerView = view.findViewById(R.id.Activity_recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         activityAdapter = ActivityAdapter()
         recyclerView.adapter = activityAdapter
 
+        // Configura il database e il repository per il ViewModel
         val database = ActivityDatabase.getDatabase(requireContext())
         val repository = ActivityRepository(database.getDao())
-
         val factory = StatsViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory).get(StatsViewModel::class.java)
 
-        // Initial list
+        // Osserva le attività della data corrente e le visualizza nel RecyclerView
         viewModel.getActivitiesByDate(System.currentTimeMillis()).observe(viewLifecycleOwner) { activities ->
             activities?.let {
                 activityAdapter.submitList(it)
             }
         }
 
-        // Calendar filter
+        // Imposta il listener per il cambio di data nel CalendarView
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             val calendar = Calendar.getInstance()
             calendar.set(year, month, dayOfMonth)
@@ -100,7 +98,7 @@ class StatsFragment : Fragment() {
             updateActivities(dateInMillis, getTypeFilter(), getDurationFilter())
         }
 
-        // Type filter (Spinner)
+        // Imposta il listener per il filtro del tipo di attività
         typeFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 updateActivities(viewModel.selectedDate.value ?: System.currentTimeMillis(), getTypeFilter(), getDurationFilter())
@@ -108,11 +106,11 @@ class StatsFragment : Fragment() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                // Do nothing
+                // Non fare nulla
             }
         }
 
-        // Duration filter (EditText)
+        // Imposta il listener per il filtro della durata
         durationFilter.doOnTextChanged { _, _, _, _ ->
             updateActivities(viewModel.selectedDate.value ?: System.currentTimeMillis(), getTypeFilter(), getDurationFilter())
             viewModel.setDuration(getDurationFilter())
@@ -121,6 +119,7 @@ class StatsFragment : Fragment() {
         return view
     }
 
+    // Funzione per aggiornare la lista delle attività in base ai filtri selezionati
     private fun updateActivities(dateInMillis: Long, type: String?, duration: Int?) {
         viewModel.getFilteredActivities(dateInMillis, type, duration).observe(viewLifecycleOwner) { activities ->
             activities?.let {
@@ -129,10 +128,12 @@ class StatsFragment : Fragment() {
         }
     }
 
+    // Funzione per ottenere il tipo di attività selezionato dallo Spinner
     private fun getTypeFilter(): String? {
         return typeFilter.selectedItem?.toString()
     }
 
+    // Funzione per ottenere la durata inserita nella EditText, se presente
     private fun getDurationFilter(): Int? {
         val durationText = durationFilter.text.toString()
         return if (durationText.isNotEmpty()) durationText.toInt() else null
