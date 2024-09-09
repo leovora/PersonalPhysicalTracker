@@ -48,7 +48,7 @@ interface ActivityDao {
      */
     @Query("SELECT * FROM activities WHERE startTimeMillis >= :startOfDay AND startTimeMillis <= :endOfDay" +
             " AND (:type IS NULL OR :type = 'All' OR type = :type)" +
-            " AND (:duration IS NULL OR ((endTimeMillis - startTimeMillis) / 60000) = :duration)")
+            " AND (:duration IS NULL OR ((endTimeMillis - startTimeMillis) / 60000) >= :duration)")
     fun getFilteredActivities(startOfDay: Long, endOfDay: Long, type: String?, duration: Int?): LiveData<List<Activity>>
 
     /**

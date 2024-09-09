@@ -14,7 +14,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:paddingVertical="10dp">
 
             <LinearLayout
                 android:id="@+id/TitleLayout"
@@ -151,15 +152,16 @@
                 android:id="@+id/messageCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/light_green"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/thirdRow"
-                android:layout_marginTop="40dp"
                 android:layout_marginHorizontal="20dp"
-                app:cardCornerRadius="20dp"
+                android:layout_marginTop="40dp"
+                android:clickable="true"
                 android:elevation="20dp"
                 android:focusable="true"
-                android:clickable="true">
+                app:cardBackgroundColor="@color/light_green"
+                app:cardCornerRadius="20dp"
+                app:cardUseCompatPadding="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/thirdRow">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -175,30 +177,30 @@
                             android:id="@+id/message_title"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
                             android:fontFamily="@font/montserrat_medium"
-                            android:text="@string/youre_doing_great_message"
+                            android:paddingHorizontal="20dp"
                             android:paddingTop="10dp"
-                            android:paddingHorizontal="20dp"/>
+                            android:text="@string/youre_doing_great_message"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="0dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                         <Button
                             android:layout_width="42dp"
                             android:layout_height="37dp"
                             android:layout_marginHorizontal="20dp"
                             android:layout_marginTop="10dp"
+                            android:backgroundTint="@color/pie1"
+                            android:clickable="false"
                             app:icon="@drawable/arrow_forward"
                             app:iconGravity="top"
                             app:iconSize="20dp"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            android:backgroundTint="@color/pie1"
-                            android:clickable="false"/>
+                            app:layout_constraintTop_toTopOf="parent" />
 
                     </LinearLayout>
 
@@ -206,11 +208,11 @@
                         android:id="@+id/message_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="15sp"
                         android:fontFamily="@font/montserrat_medium"
-                        android:text="@string/Keep_it_up_message"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="10dp"/>
+                        android:paddingVertical="10dp"
+                        android:text="@string/Keep_it_up_message"
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
@@ -232,20 +234,21 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/todaysActivities"
-                app:layout_constraintStart_toStartOf="parent"
-                app:cardBackgroundColor="@color/light_gray"
-                android:layout_marginTop="15dp"
                 android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="15dp"
+                android:elevation="20dp"
+                app:cardBackgroundColor="@color/light_gray"
                 app:cardCornerRadius="20dp"
-                android:elevation="20dp">
+                app:cardUseCompatPadding="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/todaysActivities">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
                     android:paddingHorizontal="20dp"
-                    android:paddingVertical="10dp"
-                    android:orientation="vertical">
+                    android:paddingVertical="10dp">
 
                     <LinearLayout
                         android:id="@+id/walkingLayout"
@@ -257,14 +260,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/montserrat_medium"
                             android:text="Walking"
-                            android:textStyle="bold"
-                            android:fontFamily="@font/montserrat_medium"/>
+                            android:textStyle="bold" />
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="0dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                         <TextView
                             android:id="@+id/walking_steps_text"
@@ -273,29 +276,31 @@
                             android:layout_marginEnd="5dp"
                             android:fontFamily="@font/montserrat_medium"
                             android:text="0" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="steps"
-                            android:fontFamily="@font/montserrat_medium"/>
+                            android:fontFamily="@font/montserrat_medium"
+                            android:text="steps" />
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="0dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                         <TextView
                             android:id="@+id/walking_mins_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:layout_marginEnd="5dp"
                             android:fontFamily="@font/montserrat_medium"
-                            android:layout_marginEnd="5dp"/>
+                            android:text="0" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="mins"
-                            android:fontFamily="@font/montserrat_medium"/>
+                            android:fontFamily="@font/montserrat_medium"
+                            android:text="mins" />
 
                     </LinearLayout>
 
@@ -309,40 +314,41 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/montserrat_medium"
                             android:text="Driving"
-                            android:textStyle="bold"
-                            android:fontFamily="@font/montserrat_medium"/>
+                            android:textStyle="bold" />
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="0dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                         <TextView
                             android:id="@+id/driving_kms_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="-"
+                            android:layout_marginEnd="5dp"
                             android:fontFamily="@font/montserrat_medium"
-                            android:layout_marginEnd="5dp"/>
+                            android:text="-" />
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="0dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                         <TextView
                             android:id="@+id/driving_mins_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:layout_marginEnd="5dp"
                             android:fontFamily="@font/montserrat_medium"
-                            android:layout_marginEnd="5dp"/>
+                            android:text="0" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="mins"
-                            android:fontFamily="@font/montserrat_medium"/>
+                            android:fontFamily="@font/montserrat_medium"
+                            android:text="mins" />
 
                     </LinearLayout>
 
@@ -356,38 +362,39 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/montserrat_medium"
                             android:text="Sitting"
-                            android:textStyle="bold"
-                            android:fontFamily="@font/montserrat_medium"/>
+                            android:textStyle="bold" />
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="0dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="-"
-                            android:fontFamily="@font/montserrat_medium"/>
+                            android:fontFamily="@font/montserrat_medium"
+                            android:text="-" />
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="0dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                         <TextView
                             android:id="@+id/sitting_mins_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:layout_marginEnd="5dp"
                             android:fontFamily="@font/montserrat_medium"
-                            android:layout_marginEnd="5dp"/>
+                            android:text="0" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="mins"
-                            android:fontFamily="@font/montserrat_medium"/>
+                            android:fontFamily="@font/montserrat_medium"
+                            android:text="mins" />
 
                     </LinearLayout>
 

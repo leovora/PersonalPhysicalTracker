@@ -52,10 +52,11 @@ class AutoRecognitionService : Service() {
 
         val notification: Notification = NotificationCompat.Builder(this, notificationChannelId)
             .setContentTitle("Auto Recognition")
-            .setSmallIcon(R.drawable.run_icon)
+            .setSmallIcon(R.drawable.radar)
+            .setContentText("Monitoring your activity...")
             .build()
 
-        startForeground(1, notification)
+        startForeground(2, notification)
     }
 
     @SuppressLint("MissingPermission")
