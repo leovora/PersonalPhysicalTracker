@@ -16,54 +16,29 @@ Additional features include periodic notifications to encourage activity and aut
 - Displays daily activity summaries, such as total steps and duration.
 - Indicates whether the daily step goal is achieved.
 
+<div style="display: flex;">
+  <img src="readme_images/Home.png" alt="App Screenshot" width="200">
+  <img src="readme_images/Goal.png" alt="App Screenshot" width="200">
+</div>
+
 ### Stats Section
 - Allows users to monitor activity statistics.
 - Includes a pie chart showing activity distribution and a line chart for daily steps.
 - Filters to display specific activity types or durations.
+
+<div style="display: flex;">
+  <img src="readme_images/Stats.png" alt="App Screenshot" width="200">
+  <img src="readme_images/Types.png" alt="App Screenshot" width="200">
+</div>
 
 ### Settings Section
 - Enable/disable automatic activity recognition.
 - Configure daily step goal (default: 2500 steps).
 - Manage geofencing to track predefined areas of interest.
 
----
-
-## Application Structure
-
-### Activities
-- `DailyGoalActivity`: Displays daily step goals.
-- `LineChartActivity`: Shows a line chart for daily steps.
-- `MainActivity`: Manages navigation and periodic notifications.
-- `PieChartActivity`: Displays a pie chart for activity distribution.
-
-### Adapters
-- `ActivityAdapter`: Populates the statistics list with activity data.
-
-### Data
-- `Activity`: Represents physical activities (e.g., type, start/end time, steps, distance).
-- `ActivityDao`: Manages database operations (CRUD).
-
-### Fragments
-- `HomeFragment`: Displays daily summaries and allows activity control.
-- `StatsFragment`: Shows statistics and filters activities.
-- `SettingsFragment`: Configures user preferences.
-
-### Other Components
-- Factories for creating ViewModels.
-- `GeofenceHelper`: Handles geofencing.
-
-### Receivers
-- `ActivityTransitionReceiver`: Manages transitions between activities.
-- `GeofenceBroadcastReceiver`: Handles geofence entry/exit events.
-- `NotificationBroadcastReceiver`: Sends periodic notifications.
-
-### Services
-- `AutoRecognitionService`: Recognizes activities using device sensors.
-- `WalkingActivityService`: Tracks walking activity and steps.
-
-### ViewModels
-- `GoalViewModel`: Manages daily goal data.
-- `StatsViewModel`: Handles statistical data for charts.
+<div style="display: flex;">
+  <img src="readme_images/settings.png" alt="App Screenshot" width="200">
+</div>
 
 ---
 
